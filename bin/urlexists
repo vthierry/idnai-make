@@ -1,0 +1,15 @@
+#!/usr/bin/env node
+
+let process = require("process");
+
+if (process.argv.length != 3) {
+  console.log("Usage: urlexists $url ; Returns an empty string if the URL is available, else another request status.");
+  exit();
+}
+
+fetch(require("process").argv[2], { method: "HEAD" }).then((response) => {
+  if (!response.ok)
+    console.log(response.status);
+});
+
+

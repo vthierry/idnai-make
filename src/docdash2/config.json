@@ -1,0 +1,29 @@
+{
+  "tags": {
+    "allowUnknownTags": false
+  },
+  "source": {
+    "includePattern": ".+.js$$"
+  },
+  "plugins": [
+    "plugins/markdown",
+    "plugins/jsdoc2"
+  ],
+  "markdown": {
+    "parser": "gfm"
+  },
+  "templates": {
+    "cleverLinks": true,
+    "monospaceLinks": true,
+    "default": {
+      "outputSourceFiles": false
+    }
+  },
+  "docdash": {
+    "static": true, 
+    "sort": false,
+    "search": true,
+    "collapse": true,
+    "wrap": false
+  }
+}

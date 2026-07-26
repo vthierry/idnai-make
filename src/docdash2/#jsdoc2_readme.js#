@@ -1,0 +1,10 @@
+// Reduces AIDE specific macros in README (see also jsdoc2.js)
+
+const process = require('process');
+process.stdin.on("data", data => {
+  let text = data.toString();
+
+  text = text.replace(new RegExp("@aideAPI", "g"), "<div style='float:right;margin-left:20px'><a target=_blank' href='https://line.gitlabpages.inria.fr/aide-group/aide/index.html'><img alt='AIDE API docs' src='https://line.gitlabpages.inria.fr/aide-group/aide/img/icons8-api-aide.png'/></a></div>");
+  text = text
+  process.stdout.write(text);
+});

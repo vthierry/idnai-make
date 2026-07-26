@@ -1,0 +1,24 @@
+#!/usr/bin/env node
+
+let process = require("process");
+let fs = require("fs");
+
+if (process.argv.length != 3 && process.argv.length != 4) {
+  console.log("Usage: urlget $url [$file] ; Saves the url page in a file or stdout, if available, else echo the http status.");
+  exit();
+}
+
+fetch(process.argv[2]).then((response) => {
+  if (!response.ok) {
+    console.log("Error http: " + response.statusText + " (" + response.status + ")");
+  } else if (process.argv.length == 4) {
+    {
+      // Backups the output file if needed
+      for(let file = process.argv[3]; fs.fileExistsSync(file) ; file = file + "~")
+	fs.renameSync(file, file + "~");
+    }
+    fs.writeFileSync(process.argv[3], response.text());
+  } else {
+    console.log(response.text());
+  }
+});

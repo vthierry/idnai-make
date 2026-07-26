@@ -1,0 +1,20 @@
+#!/usr/bin/env node
+
+let process = require("process");
+let fs = require("fs");
+
+if (process.argv.length < 4) {
+  console.log("Usage: subst $pattern $replacement [$input [$output]]\n Replaces a string using Javascript regular expressions, newline is treated as a standard char.");
+  exit();
+}
+
+let input = process.argv.length == 4 ? fs.readFileSync(process.stdin.fd, "utf-8") : fs.readFileSync(process.argv[4], "utf-8");
+let output = input.replace(new RegExp(process.argv[2], "gs"), process.argv[3]).trim();
+if (process.argv.length == 6) {
+  // Backups the output file if needed
+  for(let file = process.argv[5]; fs.fileExistsSync(file) ; file = file + "~")
+    fs.renameSync(file, file + "~");
+  fs.writeFileSync(process.argv[5], output + "\n");
+} else
+  console.log(output);
+
