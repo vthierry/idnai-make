@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# Usage: git_sync $message ; Synchronizes with the current repository adding a commit message.
+
+if [ -z "$*" ] ; then m="minor modification" ; else m="$*" ; fi
+
+"`dirname $0`"/clean
+
+gits="`find -name .git`"
+
+for g in $gits ; do d="`dirname $g`" ; pushd $d > /dev/null ;\
+  echo "In $d" ; git pull -q ; if [ \! -z "`git status -s`" ] ; then git commit -q -a -m "$m" ; git push -q ; fi ; git status -s
+popd > /dev/null ; done
+
+

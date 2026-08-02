@@ -9,4 +9,4 @@ define package
 }
 endef
 
-include node_modules/idnai-make/src/makefile-rules.mk
+include src/makefile-rules.mk

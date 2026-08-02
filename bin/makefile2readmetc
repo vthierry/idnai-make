@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-// # Usage: install ; Builds the ./README.md, ./package.json, ./docs/index.html (if needed) files, from the metadata.
+// # Internal usage: makefile2readmetx ; Builds the ./README.md, ./package.json, ./docs/index.html (if needed) files, from the metadata, and check the correct git configuration.
 
 const fs = require("fs");
 const { execSync } = require("child_process");

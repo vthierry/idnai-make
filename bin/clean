@@ -1,0 +1,38 @@
+#!/bin/bash
+
+# Usage: cleans [$directory] ; Cleans all known temporary files.
+
+## Changes directory if given
+
+if [ \! -z "$1" ] ; then cd "$1" ; fi
+
+## Cleans all known temporary files
+
+find . \( -type f -o -type d \) -a \( \
+     -name '#*' -o \
+     -name '.#*' -o \
+     -name '*%' -o \
+     -name '.*%' -o \
+     -name '*~' -o \
+     -name '.*~' -o \
+     -name '*.bak' -o \
+     -name '.*.bak' -o \
+     -name '*.log' -o \
+     -name 'nohup.out' -o \
+     -name 'a.out' -o \
+     -name 'a.cmd' -o \
+     -name '*.o'  -o \
+     -name '*.aux' -o \
+     -name '*.toc' -o \
+     -name '*.ind' -o \
+     -name '*.blg' -o \
+     -name '*.bbl' -o \
+     -name '*.dvi' -o \
+     -name '*.lof' -o \
+     -name '*.log' -o \
+     -name '*.ilg' -o \
+     -name '*.nav' -o \
+     -name '*.spl' -o \
+     -name '*.snm' -o \
+     -name '*.sol' \) \
+     -exec /bin/rm -rf {} \; 2>/dev/null

@@ -6,9 +6,9 @@
 
 export SHELL := /bin/bash
 
-MAKEFILES = makefile $(wildcard node_modules/idnai-*/src/makefile-rules.mk)
+THE_MAKEFILES = makefile $(wildcard node_modules/idnai-*/src/makefile-rules.mk)
 
-.SILENT: $(shell cat $(MAKEFILES) | sed -n 's/^\([^:]*\):.*/\1/p')
+.SILENT: $(shell cat $(THE_MAKEFILES) | sed -n 's/^\([^:]*\):.*/\1/p')
 
 .NOTPARALLEL:
 
@@ -18,36 +18,31 @@ export NAME := $(notdir $(PWD))
 
 ## Detects rules with parameters if any, else shows usage.
 
+what := $(strip $(foreach t, sync start show stop test build, $(if $($(t)),$(t) $(t)=$($(t)),)))
+
 default:
-	tbd=true ; for target in sync install start show stop test ;\
-	  if [ \! -z "$($(target))" ; then tbd=false ; $(MAKE) $(target) ;\
-	fi ; done ; if tbd ; then $(MAKE) usage ; fi
+	$(MAKE) $(if $(what),$(what),usage)
 
 ## Shows the makefile usage, extracting all names targets with a line of documentation.
 
 usage: # usage ; Shows the makefile usage.
-	echo -e 'Usage: make $$command\n Commands:'
-	cat $(MAKEFILES) | sed -n 's/^[a-z]*: *[^#]*# *\(.*\)/- \2/p'
+	echo -e 'Usage: make $$command, available commands:'
+	cat $(THE_MAKEFILES) | sed -n 's/^[a-z_0-9]*: *[^#]*# *\(.*\)/   - \1/p' | sort -u
 ### Note:
 ### - It is based on target's construct of the form 'target: dependencies # description'.
 
 ## Force synchronization with respect to git repositories
 
-GITS=$(dir $(shell find -name '.git'))
-
 sync: # sync[=$message] ; Synchronizes files with respect to the github repositories.
-	if [ \! -z "$(sync)" ] ; then message="sync from makefile" ; else message="$(sync)" ; fi ;\
-	find .. \( -name '*~' -o -name '*.o' -o -name '*.aux' -o -name '*.bbl' -o -name '*.blg' -o -name '*.out' -o -name '*.log' -o -name '*.toc' -o -name '*.nav' -o -name '*.snm'-o -name 'nohup.out' \) -delete
-	for f in $(GITS) ; do pushd $$f > /dev/null ;\
-	  git pull -q ; git commit -q -a -m "$(message)" ; git push -q ; git status -s ;\
-	popd > /dev/null ; done
+	node_modules/idnai-make/bin/git_sync $(sync)
 
 ## Installation operations
 
-BUILD_INSTALL = bin_ok node_modules/$(NAME) README.md 
+BUILD_INSTALL = bin/Usages.md node_modules/$(NAME) README.md 
 
-bin_ok:
+bin/Usages.md: $(wildcard bin/[a-z]*)
 	chmod a+rx ./bin/[a-z]*
+	node_modules/idnai-make/bin/bin2usage
 
 node_modules/$(NAME):
 	mkdir -p $@ ; cd $@ ; ln -s ../../* ; rm node_modules
@@ -130,7 +125,7 @@ docs/%.html: %.md
 ### - Drawings built with [libreoffice](https://fr.libreoffice.org) files are processed.
 ### - Each latex file first page is extracted as a thumbnail.
 
-LATEX_MAINS = $(shell for f in */*.tex ; do if [ \! -z "`head -1 $$f | grep '\\documentclass'`" ] ; then echo $$f ; fi ; done) 
+LATEX_MAINS = $(foreach f,$(wildcard */*.tex),$(if $(shell head -1 $(f) | grep '\\documentclass'),$(f),))
 BUILD_LATEX = $(patsubst %.odg,%.png,$(wildcard %/*.odg)) $(patsubst %.mpl,%.mpl.out.txt,$(wildcard %/*.mpl)) $(patsubst tex/%.tex,docs/%.pdf,$(patsubst src/%.tex,tex/%.tex,$(LATEX_MAINS))) $(patsubst tex/%.tex,docs/%.png,$(patsubst src/%.tex,tex/%.tex,$(LATEX_MAINS)))
 
 ### Applies pdflatex with the proper options and cleans all temporary unused files.
@@ -171,17 +166,7 @@ endif
 
 ## Defines C++ compilation rules
 
-ifneq (,$(which clang))
-CPP = clang
-else
-ifneq (,$(which g++))
-CPP = g++
-else
-ifneq (,$(which c++))
-CPP = c++
-endif
-endif
-endif
+CCP = $if($(which clang),clang,$if($(which g++),g++,$if($(which c++),c++,)))
 
 ifneq (,$(CPP))
 
@@ -203,7 +188,7 @@ node_modules/libcpp.so : $(patsubst %.cpp,%.o,$(wildcard node_modules/*/src/*.cp
 	$(CPP) -o $@ -fPIC -shared $^
 
 CPP_LIBS = node_modules/libcpp.so -lstdc++ -lm $(shell find /usr/lib -name 'libpython3.*.so' | head -1)
-ifndef (mingw64,$(OS))
+ifneq (mingw64,$(OS))
 CPP_LIBS  += -lcurl
 endif
 
@@ -240,7 +225,7 @@ endif
 
 ## Integrates derived packages makefile rurles if any 
 
-ifneq (,$(shell ls node_modules/idnai-esp32/src/makefile-rules.mk))
+ifneq (,$(shell find -wholename node_modules/idnai-esp32/src/makefile-rules.mk))
 include node_modules/idnai-esp32/src/makefile-rules.mk
 endif
 
@@ -249,7 +234,7 @@ endif
 
 BUILD = $(BUILD_INSTALL) $(BUILD_API) $(BUILD_API) $(BUILD_LATEX) $(BUILD_CPP) $(BUILD_ESP32)
 
-build: # build=[hostname[/sketchbook-path] ; Builds all targets defined by the makefile rules, either locally or an accessible host. The default `sketchbook-path`=`~/gits`.
+build: # build=[hostname[/path]] ; Builds targets defined by the makefile rules, locally or on an accessible host, path=~/gits by default.
 	if [ -z "$(build)" ] ;\
 	then $(MAKE) $(BUILD) ;\
 	else \
@@ -262,6 +247,7 @@ build: # build=[hostname[/sketchbook-path] ; Builds all targets defined by the m
 	fi
 
 clean: # clean ; Removes all targets defined by the makefile rules.
+	node_modules/idnai-make/bin/clean
 	/bin/rm -rf $(BUILD)
 
-rebuild: clean build  # build ; Cleans and builds all targets defined by the makefile rules.
+rebuild: clean build  # rebuild ; Cleans and builds all targets defined by the makefile rules.
