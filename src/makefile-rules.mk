@@ -42,15 +42,23 @@ sync: # sync[=$message] ; Synchronizes files with respect to the github reposito
 	  git pull -q ; git commit -q -a -m "$(message)" ; git push -q ; git status -s ;\
 	popd > /dev/null ; done
 
+## Installation operations
+
+BUILD_INSTALL = bin_ok node_modules/$(NAME) README.md 
+
+bin_ok:
+	chmod a+rx ./bin/[a-z]*
+
+node_modules/$(NAME):
+	mkdir -p $@ ; cd $@ ; ln -s ../../* ; rm node_modules
+
+README.md: makefile
+	node_modules/idnai-make/bin/makefile2readmetc
+
 ### Notes:
 ### - It detects git repository in the file tree with the .git directory
 ### - It cleans temporary files before synchronization.
 ### - It cheats w.r.t. commit message because useless in this context.
-
-## Updates all required packages
-
-update: # update ; Updates the repository installation.
-	node_modules/idnai-make/bin/update
 
 ## Manages a local http:127.0.0.1 server
 
@@ -239,10 +247,19 @@ endif
 ## Package
 ## Builds or cleans all files defined by the previous rules.
 
-BUILD = $(BUILD_API) $(BUILD_LATEX) $(BUILD_CPP) $(BUILD_ESP32)
+BUILD = $(BUILD_INSTALL) $(BUILD_API) $(BUILD_API) $(BUILD_LATEX) $(BUILD_CPP) $(BUILD_ESP32)
 
-build: # build ; Builds all targets defined by the makefile rules.
-	$(MAKE) $(BUILD)
+build: # build=[hostname[/sketchbook-path] ; Builds all targets defined by the makefile rules, either locally or an accessible host. The default `sketchbook-path`=`~/gits`.
+	if [ -z "$(build)" ] ;\
+	then $(MAKE) $(BUILD) ;\
+	else \
+	  $(MAKE) sync ;\
+	  if [ "$(notdir ($build))" = "$(build)" ] ;\
+	  then d="~/gits" ;\
+	  else d="$(notdir ($build))" ;\
+	  fi ;\
+	  ssh "`echo '$(build)' | sed 's/\/.*//g'`" -c "cd $$d/$(NAME) ; make sync build sync" ;\
+	fi
 
 clean: # clean ; Removes all targets defined by the makefile rules.
 	/bin/rm -rf $(BUILD)

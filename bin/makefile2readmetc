@@ -6,10 +6,6 @@ const fs = require("fs");
 const { execSync } = require("child_process");
 const wJSON = require("../etc/node_modules/idnai-json/src/wJSON.js");
 
-// Ensures the bin command are executable
-
-execSync("chmod a+rx ./bin/[a-z]*");
-  
 // Reads the package part of the makefile.
 
 let input = fs.readFileSync("makefile");
@@ -19,6 +15,16 @@ let input = fs.readFileSync("makefile");
 }
 console.log(wJSON.stringify(input));
 input["git"] = fs.FileExistsSync(".git");
+
+// File writing with the proper options
+writeFileSync := function(filename, text, git, lock) {
+  fs.chmodSync(filename, "u+w");
+  fs.writeFileSync(filename, text);
+  if (lock)
+    fs.chmodSync(filename, "a-wx");
+  if (git && input["git"])
+    execSync("git add " + filename);
+}
 
 // Manages singleton lists.
 
@@ -95,7 +101,7 @@ if((!fs.fileExists("README.md")) || fs.statSync("README.md").mtime < fs.statSync
     readme += fs.readFileSync("src/introduction.md").
     // Expands the `@frame $file` macro
     replace(new RegExp("@frame\\s+([^\\s]+)", "g"),
-	    "<p><center><iframe style='width: 100%; height: calc(66vh);' src='$1'></iframe></center><a href='$1' target='_blank'>&nbsp;&nbsp;(open in new tab)</a></p>");
+	    "<p><center><iframe style='width: 100%; height: calc(66vh);' src='$1'></iframe></center><a href='$1' target='_blank'>&nbsp;&nbsp;(open in new tab)</a></p>") + "\n<hr/>";
   
   let logo = "logo" in input ? "<span style='float:right'>![${input[\"name\"]}-logo](${input[\"logo\"]})</span>" : "";
   let keywords = "keywords" in input ? "- keywords: [ ${input[\"keywords\"]} ]\n": "";
@@ -125,12 +131,13 @@ ${os}\
 - Runs \`npm install git+${input["repository"]["url"]}\` in a \`npm\` target directory.\n\
 - Runs \`git clone ${input["repository"]["url"]}\` in a sketchbook directory.\n\
 \n`;
-  
-  fs.chmodSync("README.md", "u+w");
-  fs.writeFileSync("README.md", readme);
-  fs.chmodSync("README.md", "a-wx");
-  if (input["git"])
-    execSync("git add README.md");
+  writeFileSync("README.md", "a-wx", true, true);
+}
+
+// Generates the LICENSE.
+
+if((!fs.fileExists("LICENSE")) || fs.statSync("LICENSE").mtime < fs.statSync("makefile").mtime) {
+ writeFileSync("LICENSE", JSON.stringify(input["license"], 2), true, true);
 }
 
 // Generates the package.json.
@@ -148,10 +155,17 @@ if((!fs.fileExists("package.json")) || fs.statSync("package.json").mtime < fs.st
   "version": "${input["version"]}"\n\
   "homepage": "${input["homepage"]}"\n\
   "bugs": "${input["issues"]}"\n\
-  "license" : "${license}"\n\
-  "repository" : "${repository}"\n\
-  "contributors" : "${contributors}"\n\
+  "license": "${license}"\n\
+  "repository": "${repository}"\n\
+  "contributors": "${contributors}"\n\
 ${os}$\
+  "scripts": {\n\
+    "clean": "make -s --no-print-directory -C src clean"\n\
+    "install": "make -s --no-print-directory -C src install",\n\
+    "prepare": "make -s --no-print-directory -C src build",\n\
+    "test": "make -s --no-print-directory -C src test",\n\
+    "publish": "make -s --no-print-directory -C src sync",\n\
+  }\n\
   "dependencies": {\n    ` +
       dependencies.map(dependency =>
 	if (dependency.match(new RegExp("[a-zA-Z0-9_-]*"))) {
@@ -205,9 +219,7 @@ ${os}$\
       ).join(",\n    ")
   `  }\n`;
   
-  fs.chmodSync("package.json", "u+w");
-  fs.writeFileSync("package.json", npmpackage);
-  fs.chmodSync("package.json", "a-wx");
+  writeLockedFileSync("package.json", npmpackage, false, true);
 }
 
 
@@ -215,7 +227,7 @@ ${os}$\
 {
   if (!fs.fileExistsSync("docs/index.html")) {
     fs.mkdirSync("docs", { recursive: true });
-    fs.writeFileSync("docs/index.html", `<!doctype html>\n\
+    writeFileSync("docs/index.html", `<!doctype html>\n\
 <html>\n\
   <head>\n\
     <meta charset="utf-8">\n\
@@ -225,10 +237,8 @@ ${os}$\
   <h2>${input["description"]} </h2>\n\
   <h3>See: https://github.com/${input["login"]}/${input["name"]}</h3>\n\
 <body>\n\
-</html>\n`);
+</html>\n`, true, false);
   }
-  if (input["git"])
-    execSync("git add docs/index.html");
 }
 
 // Updates the git origin if needed.
