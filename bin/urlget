@@ -8,15 +8,19 @@ if (process.argv.length != 3 && process.argv.length != 4) {
   exit();
 }
 
+// Backups a file before modification
+backup = function(file) {
+  if (fs.fileExistsSync(file)) {
+    backup(file + "~");
+    fs.renameSync(file, file + "~");
+  }
+}
+
 fetch(process.argv[2]).then((response) => {
   if (!response.ok) {
     console.log("Error http: " + response.statusText + " (" + response.status + ")");
   } else if (process.argv.length == 4) {
-    {
-      // Backups the output file if needed
-      for(let file = process.argv[3]; fs.fileExistsSync(file) ; file = file + "~")
-	fs.renameSync(file, file + "~");
-    }
+    backup(process.argv[3]);
     fs.writeFileSync(process.argv[3], response.text());
   } else {
     console.log(response.text());

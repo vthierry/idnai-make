@@ -93,9 +93,9 @@ if((!fs.fileExists("README.md")) || fs.statSync("README.md").mtime < fs.statSync
   
   if (fs.fileExistsSync("src/introduction.md"))
     readme += fs.readFileSync("src/introduction.md").
-    // Expands the @slides $pdf-file tag
-    replace(new RegExp("@slides\\s+([^\\s]+)", "g"),
-	    "<p><center><iframe style='width: 100%; height: calc(55vw);' src='$1'></iframe></center><a href='$1' target='_blank'>&nbsp;&nbsp;(open in new tab)</a></p>");
+    // Expands the `@frame $file` macro
+    replace(new RegExp("@frame\\s+([^\\s]+)", "g"),
+	    "<p><center><iframe style='width: 100%; height: calc(66vh);' src='$1'></iframe></center><a href='$1' target='_blank'>&nbsp;&nbsp;(open in new tab)</a></p>");
   
   let logo = "logo" in input ? "<span style='float:right'>![${input[\"name\"]}-logo](${input[\"logo\"]})</span>" : "";
   let keywords = "keywords" in input ? "- keywords: [ ${input[\"keywords\"]} ]\n": "";

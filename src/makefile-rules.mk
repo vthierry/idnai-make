@@ -6,13 +6,15 @@
 
 export SHELL := /bin/bash
 
-MAKEFILES = makefile node_modules/idnai-make/src/makefile-rules.mk
+MAKEFILES = makefile $(wildcard node_modules/idnai-*/src/makefile-rules.mk)
 
 .SILENT: $(shell cat $(MAKEFILES) | sed -n 's/^\([^:]*\):.*/\1/p')
 
 .NOTPARALLEL:
 
 export PATH := $(PWD)/bin $(PWD)/node_modules/.bin $(wildcard $(PWD)/node_modules/*/bin) $(PATH)
+
+export NAME := $(notdir $(PWD))
 
 ## Detects rules with parameters if any, else shows usage.
 
@@ -78,9 +80,9 @@ start: # stop[=$port] ; Stops, if not yet done, a local http:127.0.0.1:$port ser
 	if [ \! -z "$(stop)" ] ; then port=8080 ; else port="$(stop)" ; fi ;\
 	killall http://127.0.0.1:$$port
 
-## Defines the .docs API documentation generation
+## Defines the API documentation and markdown file'es rendering generation
 
-BUILD_API = beautify node_modules/jsdoc2 docs/index.html
+BUILD_API = beautify node_modules/jsdoc2 $(subst %.md,docs/%.html,$(wildcard *.md)) $(subst src/%.md,docs/%.html,$(wildcard *.md)) docs/index.html 
 
 beautify:
 ifneq (,$(shell which js-beautify))
@@ -103,6 +105,14 @@ docs/index.html: $(wildcard introduction.md) $(wildcard *.hpp) $(wildcard *.js) 
 	jsdoc -c node_modules/adnai-make/src/docdash2/config.json -t node_modules/docdash2 -R README.md -d docs ./.empty.js $(sort $(wildcard *.js))
 	rm ./.empty.js
 
+### Renders the markdown files
+
+docs/%.html: src/%.md
+	node_modules/idnai-make/bin/subst "@frame\\s+([^\\s]+)" "<p><center><iframe style='width: 100%; height: calc(66vh);' src='$1'></iframe></center><a href='$$1' target='_blank'>&nbsp;&nbsp;(open in new tab)</a></p>" $^ | node_modules/idnai-make/bin/md2html > $@
+
+docs/%.html: %.md
+	node_modules/idnai-make/bin/subst "@frame\\s+([^\\s]+)" "<p><center><iframe style='width: 100%; height: calc(66vh);' src='$1'></iframe></center><a href='$$1' target='_blank'>&nbsp;&nbsp;(open in new tab)</a></p>" $^ | node_modules/idnai-make/bin/md2html > $@
+
 ## Defines latex and related files compilation.
 
 ### Notes:
@@ -112,27 +122,32 @@ docs/index.html: $(wildcard introduction.md) $(wildcard *.hpp) $(wildcard *.js) 
 ### - Drawings built with [libreoffice](https://fr.libreoffice.org) files are processed.
 ### - Each latex file first page is extracted as a thumbnail.
 
-LATEX_MAINS = $(shell for f in tex/*.tex ; do if [ \! -z "`head -1 $$f | grep '\\documentclass'`" ] ; then echo $$f ; fi ; done)
-BUILD_LATEX = $(patsubst tex/%.tex,docs/%.pdf,$(LATEX_MAINS)) $(patsubst tex/%.tex,docs/%.png,$(LATEX_MAINS))
+LATEX_MAINS = $(shell for f in */*.tex ; do if [ \! -z "`head -1 $$f | grep '\\documentclass'`" ] ; then echo $$f ; fi ; done) 
+BUILD_LATEX = $(patsubst %.odg,%.png,$(wildcard %/*.odg)) $(patsubst %.mpl,%.mpl.out.txt,$(wildcard %/*.mpl)) $(patsubst tex/%.tex,docs/%.pdf,$(patsubst src/%.tex,tex/%.tex,$(LATEX_MAINS))) $(patsubst tex/%.tex,docs/%.png,$(patsubst src/%.tex,tex/%.tex,$(LATEX_MAINS)))
 
 ### Applies pdflatex with the proper options and cleans all temporary unused files.
 ifneq (,$(shell which pdflatex))
-docs/%.pdf: tex/%.tex $(patsubst %.odg,%.png,$(wildcard tex/*.odg)) $(patsubst %.mpl,%.mpl.out.txt,$(wildcard tex/*.mpl)) $(wildcard tex/*.bib) $(filter-out $(LATEX_MAINS),$(wildcard tex/*.tex))
+docs/%.pdf: tex/%.tex $(wildcard tex/*.bib) $(filter-out $(LATEX_MAINS),$(wildcard tex/*.tex))
 	cd tex; pdflatex -halt-on-error -draftmode $* ; bibtex $* ; pdflatex -halt-on-error -draftmode $* ; pdflatex -halt-on-error $* ; grep -i undefined $*.log ; rm -f $*.aux $*.bbl $*.blg $*.toc $*.nav $*.snm $*.out ; ok=
 	mv tex/$*.pdf $@ 
+	git add $@
+
+docs/%.pdf: src/%.tex $(wildcard src/*.bib) $(filter-out $(LATEX_MAINS),$(wildcard src/*.tex))
+	cd src; pdflatex -halt-on-error -draftmode $* ; bibtex $* ; pdflatex -halt-on-error -draftmode $* ; pdflatex -halt-on-error $* ; grep -i undefined $*.log ; rm -f $*.aux $*.bbl $*.blg $*.toc $*.nav $*.snm $*.out ; ok=
+	mv src/$*.pdf $@ 
 	git add $@
 endif
 
 ### Applies maple on maple souce file keeping trace locally of the output.
 ifneq (,$(shell which maple))
 %.mpl.out.txt: %.mpl
-	cd tex ; maple ../$^ > ../$@
+	cd $(@D) ; maple ../$^ > ../$@
 	git add $@
 endif
 
 ### Compiles libreoffice drawings.
 ifneq (,$(shell which libreoffice))
-tex/%.png : tex/%.odg
+%.png : %.odg
 	libreoffice --headless --convert-to png --outdir $(@D) $^
 	git add $@
 endif
@@ -179,8 +194,6 @@ BUILD_CPP = $(patsubst %.mpl,%.mpl.out.txt,$(wildcard node_modules/*/src/*.mpl))
 node_modules/libcpp.so : $(patsubst %.cpp,%.o,$(wildcard node_modules/*/src/*.cpp))
 	$(CPP) -o $@ -fPIC -shared $^
 
-ar -rc $@ $^ ; ar -s $@
-
 CPP_LIBS = node_modules/libcpp.so -lstdc++ -lm $(shell find /usr/lib -name 'libpython3.*.so' | head -1)
 ifndef (mingw64,$(OS))
 CPP_LIBS  += -lcurl
@@ -217,9 +230,16 @@ vtest: $(BUILD_CPP) # vtest[=file] [argv="arg1 …"] ; Runs a given test CPP fil
 	ulimit -s 100000 2>/dev/null ; export GLIBCXX_FORCE_NEW=1 ; valgrind --max-stackframe=100000000 --track-origins=yes $$test $(argv)
 endif
 
+## Integrates derived packages makefile rurles if any 
+
+ifneq (,$(shell ls node_modules/idnai-esp32/src/makefile-rules.mk))
+include node_modules/idnai-esp32/src/makefile-rules.mk
+endif
+
+## Package
 ## Builds or cleans all files defined by the previous rules.
 
-BUILD = $(BUILD_API) $(BUILD_LATEX) $(BUILD_CPP)
+BUILD = $(BUILD_API) $(BUILD_LATEX) $(BUILD_CPP) $(BUILD_ESP32)
 
 build: # build ; Builds all targets defined by the makefile rules.
 	$(MAKE) $(BUILD)
