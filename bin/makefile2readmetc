@@ -159,14 +159,7 @@ if((!fs.fileExists("package.json")) || fs.statSync("package.json").mtime < fs.st
   "repository": "${repository}"\n\
   "contributors": "${contributors}"\n\
 ${os}$\
-  "scripts": {\n\
-    "clean": "make -s --no-print-directory -C src clean"\n\
-    "install": "make -s --no-print-directory -C src install",\n\
-    "prepare": "make -s --no-print-directory -C src build",\n\
-    "test": "make -s --no-print-directory -C src test",\n\
-    "publish": "make -s --no-print-directory -C src sync",\n\
-  }\n\
-  "dependencies": {\n    ` +
+ "dependencies": {\n    ` +
       dependencies.map(dependency =>
 	if (dependency.match(new RegExp("[a-zA-Z0-9_-]*"))) {
 	  // Detects a local installation

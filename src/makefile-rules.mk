@@ -38,22 +38,26 @@ sync: # sync[=$message] ; Synchronizes files with respect to the github reposito
 
 ## Installation operations
 
-BUILD_INSTALL = bin/Usages.md node_modules/$(NAME) README.md 
+BUILD_INSTALL = node_modules/$(NAME) README.md bin/Usages.md 
 
-bin/Usages.md: $(wildcard bin/[a-z]*)
-	chmod a+rx ./bin/[a-z]*
-	node_modules/idnai-make/bin/bin2usage
+### Notes:
+### - Creates a link of the present package in node_modules, this for homogeneity, when building from sources.
+### - Generates the README.md, package.json, and other installation file, and install what is needed.
+### - Creates an usage document with all available scripts.
 
 node_modules/$(NAME):
+	chmod u+w -R node_modules
 	mkdir -p $@ ; cd $@ ; ln -s ../../* ; rm node_modules
 
 README.md: makefile
 	node_modules/idnai-make/bin/makefile2readmetc
+	chmod -R u+w node_modules package.json package-lock.json
+	npm install --silent
+	chmod -R a-w node_modules package.json package-lock.json
 
-### Notes:
-### - It detects git repository in the file tree with the .git directory
-### - It cleans temporary files before synchronization.
-### - It cheats w.r.t. commit message because useless in this context.
+bin/Usages.md: $(wildcard bin/[a-z]*)
+	chmod a+rx ./bin/[a-z]*
+	node_modules/idnai-make/bin/bin2usage
 
 ## Manages a local http:127.0.0.1 server
 
@@ -172,7 +176,7 @@ ifneq (,$(CPP))
 
 OS=$(shell uname -s) 
 
-CPP_FLAGS = -g -fPIC -Wall -std=c++17 -D OS=$(OS) \
+CPP_FLAGS = -g -fPIC -Wall -std=c++17 -O3 -D OS=$(OS) \
  $(patsubst %,-I%,$(wildcard node_modules/*/src) $(wildcard /usr/include/python3.*) /usr/local/Frameworks/Python.framework/Headers)
 
 ifeq (--debug,$(findstring --debug,$(MAKEFLAGS)))
