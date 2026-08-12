@@ -4,7 +4,7 @@
 
 const fs = require("fs");
 const { execSync } = require("child_process");
-const wJSON = require("../etc/node_modules/idnai-json/src/wJSON.js");
+const wJSON = require("node_modules/idnai-json/src/wJSON.js");
 
 // Reads the package part of the makefile.
 

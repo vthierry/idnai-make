@@ -12,7 +12,7 @@ THE_MAKEFILES = makefile $(wildcard node_modules/idnai-*/src/makefile-rules.mk)
 
 .NOTPARALLEL:
 
-export PATH := $(PWD)/bin $(PWD)/node_modules/.bin $(wildcard $(PWD)/node_modules/*/bin) $(PATH)
+export PATH := $(PWD)/bin $(PWD)/node_modules/.bin $(PATH)
 
 export NAME := $(notdir $(PWD))
 
@@ -54,6 +54,7 @@ README.md: makefile
 	chmod -R u+w node_modules package.json package-lock.json
 	npm install --silent
 	chmod -R a-w node_modules package.json package-lock.json
+	cd node_modules/.bin ; ln -sb ../*/bin/* 
 
 bin/Usages.md: $(wildcard bin/[a-z]*)
 	chmod a+rx ./bin/[a-z]*
