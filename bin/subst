@@ -4,7 +4,7 @@ let process = require("process");
 let fs = require("fs");
 
 if (process.argv.length < 4) {
-  console.log("Usage: subst $pattern $replacement [$input [$output]]\n Replaces a string using Javascript regular expressions, newline is treated as a standard char.");
+  console.log("Usage: subst $pattern $replacement [$input [$output]] ; Replaces a string using Javascript regular expressions, newline is treated as a standard char.");
   exit();
 }
 

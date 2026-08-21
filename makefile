@@ -9,4 +9,18 @@ define package
 }
 endef
 
+INSTALL = setup-install
+TEST = setup-test
+
 include src/makefile-rules.mk
+
+setup-install: 
+#	Installs locally the online setup doc
+	gdocget -o docs/setup/setup.pdf https://docs.google.com/presentation/d/1ti_VPB0LYcZ46b3NMlDWuwPrZCw0wy7T6IWbk5g_L8Y/edit
+	for p in 3 4 5 ; do pdftk docs/setup/setup.pdf cat $p output docs/setup/setup-$p.pdf ; done
+#	Generates the setup archive
+	docs/setup/build.sh
+
+setup-test:
+	docs/setup/test.sh
+

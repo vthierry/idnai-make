@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# Usage: nospace $filename ; Removes blanks and hiding-dot in file name.
+
+f="`echo $* | sed 's/ /_/g' | sed 's/\/\./\//g'`"
+if [ "$*" \!= "$f" ] ; then mv "$*" "$f" ; fi
+

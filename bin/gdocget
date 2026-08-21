@@ -1,0 +1,36 @@
+#!/bin/bash
+. ~/.bashrc
+
+usage() {
+ cat <<EOF
+Usage: gdocget [-o $basename] [ -f $format] $url ; Download a public google-drive document, spreadsheet, presentation, drawings or file.
+ url: The whole google-drive URL, of the form 'https://docs.google.com/..'.
+  -o: A local file name, the document google-drive ID by default.
+  -f: The desired format, pdf by default, or, e.g., odt, ods, odp, odg for editable format.
+EOF
+}
+
+fatal_error() {
+    echo -e "gdocget error: $1." ; exit -1
+}
+
+f="pdf"
+while [ \! -z "$1" ] ; do case "$1" in
+    -o ) shift ; o="$1" ; shift ;;
+    -f ) shift ; f="$1" ; shift ;;
+    -h | -H | --help ) usage ; exit 0 ;;
+    -*) fatal_error "Spurious option '$1'(use -h for help)" ;;
+    * ) if [ -z "$url" ] ; then url="$1" ; shift ; else fatal_error "Unexpected argument '$1' (use -h for help)" ; fi ;;
+esac ; done
+if [ -z "$url" ] ; then fatal_error "No URL specified (use -h for help)" ; fi
+if [ \! -z "`echo $url | subst '^https://docs.google.com/.*' ''`" ] ; then fatal_error "Spurious URL '$url' (use -h for help)" ; fi
+id="`echo $url | subst '.*/d/([^/]*)/.*' '\$1'`"
+t="`echo $url | subst 'https://docs.google.com/([^/]*)/.*' '\$1'`"
+if [ -z "$o" ] ; then o="$id" ; fi
+
+if [ "$t" = "file" ]
+then urlget "https://drive.usercontent.google.com/download?id=$id" "$0"
+else urlget "https://docs.google.com/$t/export?format=$f&id=$id" "$o.$f" 
+#then wget -nv -O "$o" --no-check-certificate "https://drive.usercontent.google.com/download?id=$id"
+#else wget -nv -O "$o.$f" --no-check-certificate "https://docs.google.com/$t/export?format=$f&id=$id"
+fi

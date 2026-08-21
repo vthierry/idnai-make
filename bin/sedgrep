@@ -1,0 +1,74 @@
+#!/bin/sh
+. ~/.bashrc
+
+usage() {
+ cat <<EOF
+Usage: sedgrep [-dir 'directory'] [-name 'pattern'] [-in in [-out out | [-js | -js0] js] | -list ] ; Multiple files replacement.
+ Find in the given directory (default is '.') and sub-directories files 
+    - matching the -name pattern (default is '*') and containing the -in regular expression
+    - replaced by the -out regular expression, if specified
+    - with the -list option simply list the file names
+    - with the js option parses using a js regex expressionconstruct of the form
+       text.replace(/--here the regex--/, "---here the substitution---")'
+    - with the js0 option tests on the 1st file, output on stdout and exit 
+CAUTION : You MUST escape regular-expression as for sed, e.g. use \/ instead of / when replacing
+ *::: *{.admonition}\n([^:]*):
+EOF
+}
+
+dir="."; name="*"
+while [ \! -z "$1" ]
+do
+ case "$1" in
+  -dir ) dir="$2"; shift;;
+  -name ) name="$2"; shift;;
+  -in ) in="$2"; shift;;
+  -out ) replace="1"; out="$2"; shift;;
+  -js ) replace="2"; js="$2"; shift;;
+  -js0 ) replace="0"; js="$2"; shift;;
+  -list ) list="1";;
+  * ) usage; exit 0;;
+ esac
+ shift
+done
+
+if [ "$list" = 1 ]
+then
+  find $dir -type f -name "$name" -exec grep -l -e "$in" {} \;
+elif [ -z "$replace" ]
+then
+  if [ -z "$in" ]
+  then
+    find $dir -type f -name "$name" 
+  else
+    find $dir -type f -name "$name" -exec grep -H -e "$in" {} \;
+  fi
+else
+
+    echo "Doing : s/$in/$out/g on files";
+
+  if [ "$replace" \!= 1 ]
+  then
+   echo "const process = require('process'); process.stdin.on('data', data => { var text = data.toString(); console.log($js); });" > /tmp/sedgrep.js 
+  fi
+
+  find $dir -type f -name "$name" -exec grep -q -e "$in" {} \; -print > /tmp/sedgrep$$
+  while read -r f
+  do 
+    if [ -z "`echo $f | grep '\"'`" ] 
+    then
+     if [ "$replace" = 1 ]
+     then
+	echo "$f" ; if cp "$f" "$f.bak" ; then sync ; sed "s/$in/$out/g" < "$f.bak" > "$f"  ; touch -r "$f.bak" "$f" ; fi
+     elif [ "$replace" = 0 ]
+     then
+       echo "$f" ; node /tmp/sedgrep.js < "$f"  ; exit
+     elif [ "$replace" = 2 ]
+     then
+       echo "$f" ; if cp "$f" "$f.bak" ; then sync ; node /tmp/sedgrep.js < "$f.bak" > "$f"  ; touch -r "$f.bak" "$f" ; fi
+     fi
+    else 
+     echo "Oh «$f» has a \" in its name cannot manage"
+    fi 
+  done < /tmp/sedgrep$$
+fi

@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# Usage: confirm $message [$exit_message] ; Asks a true/false question ; returns the boolean answer or exit with error if false and $exit_message is set.
+
+read -p "$1? (y/N) : " -n 1 -e rep ; if [ "$rep" = "y" ] ; then true ; else if [ \! -z "$exit_message" ] ; then echo "$exit_message" ; exit 1 ; fi ; false ; fi
+
