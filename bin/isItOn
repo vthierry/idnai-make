@@ -22,6 +22,9 @@ setMAC() { ### Adds a new assignment to the table.
     what="`echo $1 | sed 's/=.*$//'`"
     MAC="`echo $1 | sed 's/^[^=]*=//'`"
     MACS["$what"]="$MAC"
+    true
+  else
+    false
   fi
 }
 ### Loads existing assignments.
@@ -34,9 +37,8 @@ then usage ; exit
 elif [[ "$1" =~ ^([a-f0-9]{2}:){5}[a-f0-9]{2}$ ]] ### A MAC address is given directly, no assignment.
 then MAC="$1" 
 else
-  if [[ "$1" =~ ^[A-Za-z0-9_]+=([a-f0-9]{2}:){5}[a-f0-9]{2}$ ]] ### A new assignment is given.
-  then
-    setMAC "$1"
+  if setMAC "$1"
+  then ### A new assignment is given.
     what="`echo $1 | sed 's/=.*$//'`"
     #### Updates the assignments file, suppressing previous $what assignment, if any, then appending the new one.
     mv $data $data~ ; (grep -v "^$what=" < $data~ ; echo "$1") > $data
