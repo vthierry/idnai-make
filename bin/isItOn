@@ -1,0 +1,61 @@
+#!/bin/bash
+needfor arp-scan
+
+usage() {
+  cat <<EOF
+Usage: isItOn [\$mac|\$what=\$mac|\$what] [-b [\$port]] ; Returns the IP address of a device if on the network, else nothing.
+ mac: A MAC address, with a proper syntax.
+ what: A short-name associated to a MAC address.
+   - The form '\$what=\$mac' allows to register a MAC address under a short-name, for subsequent calls.
+   - Assignments '\$what=\$mac' are stored in the .isItOn file, to be edited with care.
+   - If '\$what' is undefined or '\$mac' not a correct MAC address, an error message is on stderr, stdout is empty and it exits without error.
+     - This allows to check if short-name is known, using 'if [ \! -z "\`isItOn \$what\`" ] ...'
+ -b: Opens the http://\$IP[:\$port] home-page with the default \$BROWSER, if defined, for the \$IP address, if defined, on either the given or the default port, otherwise silently exits.
+EOF
+}
+
+## Manages the MACS<what,MAC> associative table.
+declare -A MACS
+setMAC() { ### Adds a new assignment to the table.
+  if [[ "$1" =~ ^[A-Za-z0-9_]+=([a-f0-9]{2}:){5}[a-f0-9]{2}$ ]]
+  then
+    what="`echo $1 | sed 's/=.*$//'`"
+    MAC="`echo $1 | sed 's/^[^=]*=//'`"
+    MACS["$what"]="$MAC"
+  fi
+}
+### Loads existing assignments.
+data="`dirname $0`/.isItOn"
+touch $data ; while read line ; do setMAC $line ; done < $data
+
+## Manages the command options.
+if [ -z "$1" -o "$1" = -h -o "$1" = --help ]
+then usage ; exit
+elif [[ "$1" =~ ^([a-f0-9]{2}:){5}[a-f0-9]{2}$ ]] ### A MAC address is given directly, no assignment.
+then MAC="$1" 
+else
+  if [[ "$1" =~ ^[A-Za-z0-9_]+=([a-f0-9]{2}:){5}[a-f0-9]{2}$ ]] ### A new assignment is given.
+  then
+    setMAC "$1"
+    what="`echo $1 | sed 's/=.*$//'`"
+    #### Updates the assignments file, suppressing previous $what assignment, if any, then appending the new one.
+    mv $data $data~ ; (grep -v "^$what=" < $data~ ; echo "$1") > $data
+  else
+    what="$1" ### A hopefully existing short-name is given.
+  fi
+  ### Sets the related MAC address if any.
+  if [ -v MACS["$what"] ]
+  then MAC="${MACS["$what"]}"
+  else >&2 echo "Sorry '$1' is neither a registered short-name, nor a valid MAC address or short-name assignment." ; exit
+  fi
+fi
+
+## Retrieves the IP from the MAC address, if online on the local network.
+IP="`sudo arp-scan -lqx | grep "$MAC" | awk '{print $1}'`" ; echo $IP
+
+## Opens the browser, if defined, for the IP address, if defined, on the default or given port.
+if [ \! -z "$BROWSER" -a \! -z "$IP" -a "$2" = -b ]
+then if [ -z "$3" ] ; then $BROWSER http://$IP ; else $BROWSER http://$IP:$3 ; fi
+fi
+
+   

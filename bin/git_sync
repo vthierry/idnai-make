@@ -6,13 +6,18 @@ if [ -z "$*" ] ; then m="minor modification" ; else m="$*" ; fi
 
 "`dirname $0`"/clean
 
-gits="`find -name .git`"
-
-for g in $gits ; do d="`dirname $g`" ; pushd $d > /dev/null ;\
-  if [ "$d" \!= "." ] ; then echo "In $d" ; fi
+git_sync_here() {
   git pull -q --allow-unrelated-histories;
   if [ \! -z "`git status -s`" ] ; then git commit -q -a -m "$m" ; git push -q ; fi
   git status -s
-popd > /dev/null ; done
+}
+
+git_sync_here
+
+gits="`find -name .git`"
+
+for g in $gits ; do d="`dirname $g`" ; if [ "$d" \!= "." ] ; then
+  pushd $d > /dev/null ; echo "In $d" ; git_sync_here ; popd > /dev/null
+fi ; done
 
 
