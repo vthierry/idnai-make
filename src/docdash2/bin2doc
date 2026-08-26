@@ -1,0 +1,28 @@
+#!/usr/bin/env node
+
+const fs = require("fs");
+
+// Internal usage: bin2doc.js $script … ; Converts a script usage to a proper jsdoc.
+
+argv.slice(2).foreach(file => {
+  let input = fs.readFileSync(file, "utf-8").replace(new Regex("(.*EOU|console.log\(`)\s*(Usage:.*)(EOU|`\);).*", "gs"), "$2");
+
+  let name  = input.replace(new Regex("^Usage: ([^\s]*).*"), "$1");
+  let usage = input.replace(new Regex("^(Usage: [^\n]*).*"), "$1");
+  let line  = input.replace(new Regex("^Usage: [^\n]\n[\s-]*([^\n]*).*"), "$1");
+  let body  = input.replace(new Regex("^Usage: [^\n]\n(.*)"), "$1").replace("\n", "\n *");
+  console.log(`
+/** ${line}
+ * @function ${name}
+ * @memberof scripts
+ * @static
+ * \`\`\`
+ * ${usage}
+ * \`\`\`
+${body}
+*/
+`);
+});
+
+
+	

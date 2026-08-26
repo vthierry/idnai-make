@@ -1,0 +1,35 @@
+#!/usr/bin/env node
+
+const fs = require("fs");
+
+// Internal usage: mk2doc.js $makefile … ; Converts makefile autodocumentation to a proper jsdoc.
+
+argv.slice(2).foreach(file => {
+  let inputs = fs.readFileSync(file, "utf-8").
+      replace(new Regex("\n([a-z_0-9]*)\s*: *[^#]*#([^\n]*)", "gs"), "\n##@Usage: $1$2").
+      replace(new Regex("[^#][^\n]*\n", "gs"), "").
+      split("\n##@").
+      foreach(input => {
+	let target  = input.replace(new Regex("^Usage: ([^\s]*).*"), "$1");
+	let usage = input.replace(new Regex("^(Usage: [^\s]*\s*([[].*[]])?.*"), "$1");
+	let line  = input.replace(new Regex("^Usage: [^\s]*\s*([[].*[]])?([^\n]*)\n"), "$1");
+	let body  = input.replace(new Regex("^Usage: [^\n]\n(.*)"), "$1").replace("\n", "\n *");
+  console.log(`
+/** ${line}
+ * @function ${target}
+ * @memberof make
+ * @static
+ * \`\`\`
+ * ${usage}
+ * \`\`\`
+${body}
+*/
+`);
+});
+
+
+	
+
+
+	 cat $^ | grep -E '^([a-z_0-9]*: *[^#]*#|#+ *-)' | sed 's/^\([a-z_0-9]*\): *[^#]*#\(.*\)$$/* @function make \1\n* @description \1\2/' ;\
+	echo '*/') > $@

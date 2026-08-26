@@ -1,6 +1,12 @@
 #!/bin/bash
 
-# Usage: nospace $filename ; Removes blanks and hiding-dot in file name.
+if [ -z "$1" -o "$1" = -h -o "$1" = --help ]
+then cat <<EOU
+Usage: nospace \$filename
+- Removes blanks and hiding-dot in file name.
+EOU
+exit
+fi
 
 f="`echo $* | sed 's/ /_/g' | sed 's/\/\./\//g'`"
 if [ "$*" \!= "$f" ] ; then mv "$*" "$f" ; fi

@@ -2,23 +2,25 @@
 . ~/.bashrc
 
 usage() {
- cat <<EOF
-Usage: gdocget [-o $basename] [ -f $format] $url ; Download a public google-drive document, spreadsheet, presentation, drawings or file.
- url: The whole google-drive URL, of the form 'https://docs.google.com/..'.
-  -o: A local file name, the document google-drive ID by default.
-  -f: The desired format, pdf by default, or, e.g., odt, ods, odp, odg for editable format.
-EOF
+ cat <<EOU
+Usage: gdocget [-o $basename] [ -f $format] $url
+- Download a public google-drive document, spreadsheet, presentation, drawings or file.
+- Options:
+  -  url: The whole google-drive URL, of the form 'https://docs.google.com/..'.
+  - -o: A local file name, the document google-drive ID by default.
+  - -f: The desired format, pdf by default, or, e.g., odt, ods, odp, odg for editable format.
+EOU
 }
 
 fatal_error() {
-    echo -e "gdocget error: $1." ; exit -1
+    echo -e "gdocget error: $1." ; exit 1
 }
 
 f="pdf"
 while [ \! -z "$1" ] ; do case "$1" in
     -o ) shift ; o="$1" ; shift ;;
     -f ) shift ; f="$1" ; shift ;;
-    -h | -H | --help ) usage ; exit 0 ;;
+    -h | --help ) usage ; exit 0 ;;
     -*) fatal_error "Spurious option '$1'(use -h for help)" ;;
     * ) if [ -z "$url" ] ; then url="$1" ; shift ; else fatal_error "Unexpected argument '$1' (use -h for help)" ; fi ;;
 esac ; done

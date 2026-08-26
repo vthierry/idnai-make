@@ -93,11 +93,16 @@ docs/%.html: src/%.md
 BUILD_API = beautify $(subst src/%.md,docs/%.html,$(wildcard *.md)) docs/index.html linkcheck
 
 ### - Building API documentation:
-###   - Documentation is found in src/*.md, src/*.js, src/*.hpp, */*.mpl, and bin/* files.
+###   - Documentation is found in src/*.md, */*.js, */*.hpp, */*.mpl, and bin/* files.
 ###   - Source file are beautified yielding a standard layout.
 ###   - The src/introduction.md content and the ./makefile metadata yield the home page.
 ###   - Other markdown documentation is converted to docs/*.html files.
-###   - It uses [jsdoc](https://jsdoc.app) for all sources, but Python ones, with a variant of the [docdash](https://www.npmjs.com/package/docdash) template.
+###   - Implementation details:
+###     - It uses [jsdoc](https://jsdoc.app) for all sources, but Python ones, with a variant of the [docdash](https://www.npmjs.com/package/docdash) template.
+###   - Script usage documentation:
+###     - Bash script usage is by contract implemented in a 'cat <<EOU\nUsage: … \nEOU' construct.
+###     - Node script usage is by contract implemented in a 'console.log(`\nUsage: … \n`);' construct.
+###     - In both cases the syntax is of the form 'Usage: $function_name $arguments\n$one_line_description\n$more_description'.
 ###   - Documentation usage:
 ###     - Classes with lower-case 1st letter are documented as "factory", i.e., set of static methods.
 ###     - The `@extends` tag must be inserted _after_ the `@description`, to generate the proper layout.
@@ -134,27 +139,23 @@ endif
 
 node_modules/docdash2:
 	mkdir -p $@
-	cp -rf {node_modules/docdash/{static,tmpl},node_modules/idnai/src/docdash2/publish.js} $@
+	cp -rf node_modules/{docdash/{static,tmpl},idnai-make/src/docdash2/{publish.js,bin2doc,mk2doc}} $@
 	cp  ./docdash2/docdash2.js node_modules/jsdoc/plugins
 
 #### Converts bin and make usage's documentations in jsdoc one.
 
-node_modules/docdash2/tmp/makefile.js: $(THE_MAKEFILES)
-	mkdir $(@D)
-	(echo -e "/** @class make\n@description Usage: make \$$command, available commands:" ;\
-	 cat $^ | grep -E '^([a-z_0-9]*: *[^#]*#|#+ *-)' | sed 's/^#*/*  /' | sed 's/[a-z_0-9]*: *[^#]*#/* -/' | sed ;\
-	 echo '*/') > $@
+node_modules/docdash2/tmp_mk.js: $(THE_MAKEFILES)
+	(echo -e "/** @class make\n@description Usage: make \$$command, available commands: */" ;\
+	 node_modules/docdash2/mk2doc $^) > $@
 
-node_modules/docdash2/tmp/usage.js : $(wildcard bin/[a-z0-9]*)
-	mkdir $(@D)
-	(echo -e "/** @class scripts\n@description Available scripts:" ;\
-	 grep -E '(^|# |")Usage *:' $^ | subst '.*(# |")Usage *:' "* - Usage: " ;\
-	 echo '*/') > $@
+node_modules/docdash2/tmp_bin.js : $(wildcard bin/[a-z0-9]*)
+	(echo -e "/** @class scripts\n@description Available scripts: */" ;\
+	 node_modules/docdash2/bin2doc $^) > $@
 
 #### Runs jsdoc with linkcheck
 
-docs/index.html: README.md node_modules/docdash2 node_modules/docdash2/tmp/makefile.js $(wildcard */*.hpp) $(wildcard */*.js) $(wildcard */*.sh)
-	jsdoc -c node_modules/adnai-make/src/docdash2/config.json -t node_modules/docdash2 -R README.md -d docs node_modules/docdash2/tmp/usage.js node_modules/docdash2/tmp/makefile.js $(sort $(wildcard *.js))
+docs/index.html: README.md node_modules/docdash2 node_modules/docdash2/tmp/makefile.js $(wildcard */*.hpp) $(wildcard */*.js) $(wildcard */*.sh) $(wildcard */*.mpl)
+	jsdoc -c node_modules/adnai-make/src/docdash2/config.json -t node_modules/docdash2 -R README.md -d docs node_modules/docdash2/tmp_*.js $(sort $(wildcard *.js))
 
 linkcheck:
 	for l in `find docs -name '*.html' -exec grep 'href *=' {} \; | subst "[^\n]*href=['\"]([^'\"]*)['\"][^\n]*" "$$1" | sort -u` ;\
@@ -164,7 +165,7 @@ linkcheck:
 
 ### Defines maple processing for file generation.
 
-### - Generating code and dwawings from computer algebra:
+### - Generating code and drawings from computer algebra:
 ###   - Batch [maple](https://www.maplesoft.com) `*/*.mpl` files are processed.
 ###     - This allows to generate figures or other tex elements.
 ###     - A `*/*.mpl.out.txt` output is produced.

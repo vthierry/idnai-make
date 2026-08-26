@@ -1,0 +1,40 @@
+#!/bin/sh
+. ~/.bashrc
+
+usage() {
+ cat <<EOF
+Usage: findsubst [-dir \$directory] [-name '\$pattern'] [-in '\$in' [-out '\$out']]
+- Multiple file replacement.
+- Find:
+   - In the given directory (default is '.') and its sub-directories.
+   - Files matching the -name pattern (default is '*'), and
+     - containing the '\$in' regular expression, if specified.
+   - Regular expressions are those defined in JavaScript.
+- Then:
+   - Replaces by the -out regular expression target, if specified.
+   - Files are backup using the '~' suffix before being changed.
+EOF
+}
+
+dir="."; name="*"
+while [ \! -z "$1" ]
+do
+ case "$1" in
+  -dir ) dir="$2"; shift;;
+  -name ) name="$2"; shift;;
+  -in ) in="$2"; shift;;
+  -out ) out="$2"; shift;;
+  * ) usage; exit;;
+ esac
+ shift
+done
+
+if [ -z "$in" ]
+then find $dir -type f -name "$name"
+elif [ -z "$out" ]
+then find $dir -type f -name "$name" -exec grep -H -E -e "$in" {} \;
+else
+  for f in `find $dir -type f -name "$name" -exec grep -l -R -e "$in" {} \;`
+  do subst "$in" "$out" $f $f
+  done
+fi

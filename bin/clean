@@ -1,10 +1,23 @@
 #!/bin/bash
 
-# Usage: cleans [$directory] ; Cleans all known temporary files.
+if [ "$1" = -h -o "$1" = --help ]
+then cat <<EOU
+Usage: cleans [\$directory]
+- Cleans all standard temporary files.
+  - The default directory is '.'.
+EOU
+exit
+fi
 
 ## Changes directory if given
 
-if [ \! -z "$1" ] ; then cd "$1" ; fi
+if [ \! -z "$1" ] ; then
+  if [ -d "$1" ] ; then
+    cd "$1"
+  else
+    echo "The '$1' directory is not found." ; exit 1
+  fi
+fi
 
 ## Cleans all known temporary files
 

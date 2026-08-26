@@ -9,14 +9,13 @@ exports.handlers = {
     // Gets the file directory
     let dirname = path.dirname(e.filename);
     if (jsdoc2_done[dirname] == undefined) {
-      // Considers all .hpp and .sh files and extracts the /** ../.. */ sections
+      // Considers all .hpp, .sh, .mpl files and extracts the /** ../.. */ sections
       {
 	let text = "";
         // Gets all source files
         let files = fs.readdirSync(dirname);
-        // Considers all .h, .hpp, .js files
         for (let i in files)
-          if (files[i].match("^.+\\.(hpp|h|sh)$")) {
+          if (files[i].match("^.+\\.(hpp|sh|mpl)$")) {
             //- console.log("documenting " + files[i]);
             let input = "" + fs.readFileSync(files[i]);
             // Extracts the /** ../.. */ sections
@@ -26,7 +25,7 @@ exports.handlers = {
             }
           }
 	// Cleans the start '#' char
-	text = text.replace(new RegExp("\n#", "g"), "\n");
+	text = text.replace(new RegExp("\n#+", "g"), "\n");
 	// Appends to the documentation source
 	e.source = text + e.source;
       }

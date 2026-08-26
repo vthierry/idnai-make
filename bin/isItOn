@@ -2,16 +2,25 @@
 needfor arp-scan
 
 usage() {
-  cat <<EOF
-Usage: isItOn [\$mac|\$what=\$mac|\$what] [-b [\$port]] ; Returns the IP address of a device if on the network, else nothing.
- mac: A MAC address, with a proper syntax.
- what: A short-name associated to a MAC address.
-   - The form '\$what=\$mac' allows to register a MAC address under a short-name, for subsequent calls.
-   - Assignments '\$what=\$mac' are stored in the .isItOn file, to be edited with care.
-   - If '\$what' is undefined or '\$mac' not a correct MAC address, an error message is on stderr, stdout is empty and it exits without error.
-     - This allows to check if short-name is known, using 'if [ \! -z "\`isItOn \$what\`" ] ...'
- -b: Opens the http://\$IP[:\$port] home-page with the default \$BROWSER, if defined, for the \$IP address, if defined, on either the given or the default port, otherwise silently exits.
-EOF
+  cat <<EOU
+Usage: isItOn [[\$what=\$mac|\$what|\$mac] [[-b [\$port]] | -c \$what] | -e]
+- Outputs the IP address of a device if it is on the network, else nothing.
+  - mac: A MAC address, with a proper syntax.
+     - The form '\$what=\$mac' registers a MAC address under a short-name, for subsequent calls.
+  - what: A short-name associated to a registered MAC address.
+- Options:
+  - -b: Opens the http://\$IP[:\$port] home-page in the default \$BROWSER, if defined, for the \$IP address, if defined, on either the given or the default port.
+  - -c: Checks if the '\$what' is registered, output the related MAC address if yes, and true or false accordingly, without network scan.
+  - -e: Edits, with the default \$EDITOR, the '.isItOn' file with '\$what=\$mac' definitions, and exit.
+- Examples:
+  - The construct 'if isItOn \$what > /dev/null ; then …` detects if the device is on the network or not.
+    - The script returns true or false accordingly.
+  - The construct 'if [ -z "\`isItOn \$what ; then …` detects if the device is on the network or not.
+- Notes:
+  - If the \$EDITOR or \$BROWSER environment variable is not set, the related option is silently discarded.
+  - The MAC expected address syntax is 'xx:xx:xx:xx:xx:xx' where 'x' stands for an hexadecimal digit.
+  - If '\$what' is an unknown short-name, stderr gets an error message, stdout remains empty, and it exists without error.
+EOU
 }
 
 ## Manages the MACS<what,MAC> associative table.
@@ -34,6 +43,10 @@ touch $data ; while read line ; do setMAC $line ; done < $data
 ## Manages the command options.
 if [ -z "$1" -o "$1" = -h -o "$1" = --help ]
 then usage ; exit
+elif [ "$1" = -e ]
+then if [ \! -z "$EDITOR" ] ; then $EDITOR $data ; exit ; fi
+elif [ "$1" = -c ]
+then if [ -v MACS["$what"] ] ; then echo "${MACS["$what"]}" ; true ; else false ; fi ; exit
 elif [[ "$1" =~ ^([a-f0-9]{2}:){5}[a-f0-9]{2}$ ]] ### A MAC address is given directly, no assignment.
 then MAC="$1" 
 else
@@ -48,7 +61,7 @@ else
   ### Sets the related MAC address if any.
   if [ -v MACS["$what"] ]
   then MAC="${MACS["$what"]}"
-  else >&2 echo "Sorry '$1' is neither a registered short-name, nor a valid MAC address or short-name assignment." ; exit
+  else >&2 echo "Unknown short-name '$1'." ; exit
   fi
 fi
 
@@ -60,4 +73,6 @@ if [ \! -z "$BROWSER" -a \! -z "$IP" -a "$2" = -b ]
 then if [ -z "$3" ] ; then $BROWSER http://$IP ; else $BROWSER http://$IP:$3 ; fi
 fi
 
-   
+## Returns true or false
+if [ -z "$IP" ] ; then false ; else true ; fi
+
