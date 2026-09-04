@@ -54,7 +54,7 @@ install: $(INSTALL) # [=$package] Installs or updates, a given packages or all p
 
 ## - Disclaimer: do NOT use `npm target` directly but `make target`.
 ## - Generates the README.md, package.json, and other installation file, and install what is needed.
-## - Hint: The INSTALL variable can be defined in makefile for package specific targets.
+## - Hint: The INSTALL target's variable can be defined in makefile for package specific targets.
 ## - Note: a link of the present package is created in node_modules for homogeneity.
 
 node_modules/$(NAME):
@@ -80,7 +80,7 @@ build: # [=hostname[/path]] Builds targets defined by the makefile rules, locall
 
 ## - Partial installation policy:
 ##   - If a software is missing, the rule is silently ignored, assuming it is processed from another checkout.
-## - Hint: The BUILD variable can be defined in makefile for package specific targets.
+## - Hint: The BUILD target's variable can be defined in makefile for package specific targets.
 
 ### Properly renders the markdown files (with the @frame tag, if any).
 
@@ -290,7 +290,7 @@ test: # [=file] [argv="arg1 …"] Runs a given src/$file file, if specified, or 
 	  if [ \! -z "$(TEST)" ] ; then $(MAKE) $(TEST) ; fi \
         else \
 	  switch($(suffix $(test))) { \
-	    case 'C' : $(MAKE) $(BUILD_CPP) ; $(MAKE) test=node_modules_/.bin/$(basename $(test)) $(argv) ;;\
+	    case 'C' : $(MAKE) $(BUILD_CPP) ; $(MAKE) test=node_modules_/.bin/$(basename) $(test)) $(argv) ;;\
 	    case 'sh' : case 'js' : chmod a+rx src/$(test) ; ./src/$(test) $(argv) ;;\
             case 'py' : python3 ./src/(test) ;;\
 	    case 'mpl' : $(MAKE) ./src/$(test).out.txt ;;\
@@ -299,8 +299,13 @@ test: # [=file] [argv="arg1 …"] Runs a given src/$file file, if specified, or 
          }\
 	fi	
 
-## - The `src/test.{C,sh,js,py,mpl,html}` files are managed for functional and non-regression.
-## - Hint: The TEST variable can be defined in makefile for package specific targets.
+## - The `src/test.{C,sh,js,py,mpl,html}` files are managed for functional and non-regression tests.
+##    - It is run after installation or before publication to validate the package.
+##    - By contract:
+##      - such a test is silent on success and output human readable message on failure.
+##      - is executed in little time (less or about a second) to avoid blocking the installation process.
+## - Hint: The TEST target's variable can be defined in makefile for package specific targets.
+## - Hint: The `demo` target is dedicated to benckmarks, interactive execution, etc…
 
 ifneq (,$(which gdb))
 gtest: $(BUILD_CPP) # [=file] [argv="arg1 …"] Runs a given CPP file with gdb, for debug.
@@ -318,6 +323,23 @@ vtest: $(BUILD_CPP) # [=file] [argv="arg1 …"] Runs a given CPP file with valgr
 else 
 	echo "You need to `sudo apt install valgrind` for `make gtest`."
 endif
+
+## Demo
+
+demo:  # Runs, if any, a demonstration of the present package.
+ifneq (,$(wildcard bin/demo))
+	bin/demo
+endif
+ifneq (,$(DEMO))
+	$(MAKE) $(DEMO)
+endif
+ifeq (,$(wildcard bin/demo) $(DEMO))
+	echo "No demo available for this package"
+endif
+
+## - This optional target allows to execute any interactive demonstration of the package, or benchmark, etc.
+##   - By contract, a demo is interactive, does not require parameter, and is auto-documented.
+## - The bin/demo executable and/or the DEMO target's variable.
 
 ## Builds or cleans all files defined by the previous rules.
 

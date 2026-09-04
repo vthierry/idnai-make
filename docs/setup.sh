@@ -28,7 +28,7 @@ openurl() { # Usage: open url [title] ; Opens a web page for the user, with an o
   $BROWSER "$1"
 }
 
-confirm "This script will setup an idnai-* driven package, is it OK" true
+confirm "This script will set up an idnai-* driven package, is it OK" "OK. Bye."
 
 needfor nodejs
 
@@ -41,9 +41,9 @@ if [ \! -z "$npm_packages_to_install" ] ; then
     sudo npm install -g $npm_package_to_install
 fi fi 
 
-if confirm "Are you in your scketchbook directory"
+if confirm "Are you in your sketchbook directory"
 then
-  read -p "What is, please, the your GitHub login: " -e login
+  read -p "What is, please, your GitHub login: " -e login
   read -p "What is, please, the package name: " -e name
   ok="`nodejs -e 'fetch(\"https://github.com/$login/$name\").then((r) => { if (r.ok) console.log("ok") });'`"
   if [ -z "$ok" ] ; then cat <<EOF
@@ -65,11 +65,11 @@ EOF
   sed "s/@login/$login/" < makefile~ > makefile
   make install
   if [ \! -L "./setup.sh" ] ; then rm ./setup.sh ; ln -s $name/node_modules/idnai-make/docs/setup.sh ; fi
-  echo "[3/4] Updating the GitHub repository"
+  echo "[3/4] Updating the GitHub repository …"
   git add makefile bin docs
   git commit -a -m "setup as an idnai-* driven package"
   git push origin master --force
-  echo "[4/4] Next step is for you, to activate the documentation pages …"
+  echo "[4/4] The next step is for you, to activate the documentation pages …"
   openurl "https://vthierry.dithub.io/idnai-make/docs/setup/setup-5.pdf" "Activate documentation"
   openurl "https://github.com/$login/$name/settings/pages" "Activate web page settings"
 else cat <<EOF

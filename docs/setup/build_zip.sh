@@ -68,6 +68,7 @@ endef
 INSTALL = 
 BUILD = 
 TEST = 
+DEMO = 
 
 ifneq (,\$(ls node_modules/*/src/makefile-rules.mk))
 include node_modules/*/src/makefile-rules.mk
