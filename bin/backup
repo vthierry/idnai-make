@@ -1,0 +1,21 @@
+#!/bin/bash
+
+if [ -z "$1" -o "$1" = -h -o "$1" = --help ]
+then cat <<EOU
+Usage: backup [\$file] [-v]
+- Backups a file if it exists, appending a '~' suffix.
+  - -v: Output a message if the file exists and is renamed.
+EOU
+exit
+fi
+
+backup() {
+  if [ -f "$1" ] ; then
+    if [ "$2" = "-v" ] ; then echo "The file '$1' exists and is renamed appendig a '~' suffix." ; fi
+    backup "$1~"
+    mv "$1" "$1~"
+  fi
+}
+
+backup $*
+

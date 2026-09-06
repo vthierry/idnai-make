@@ -1,19 +1,39 @@
 #!/usr/bin/env node
 
-const transform = require("../src/transform.js")
+const fs = require("fs");
 
 if (process.argv.length > 2 && ["-h", "--help"].includes(process.argv[2]) || ![3, 4].includes(process.argv.length)) {
   console.log(`
 Usage: urlget $url [$file]
-- Saves the URL unique page, if available, in a file or on stdout, else echo the HTTP status.
+- Saves the URL unique page, if available, in a file.
+  - The file default name is given by the URL basename.
 `);
   exit();
 }
 
-fetch(process.argv[2]).then((response) => {
-  if (!response.ok) {
-    console.error("Error http: " + response.statusText + " (" + response.status + ")");
-  } else {
-    transform((input) => response, process.argv.length == 4 ? [ "", process.argv[3] ] : [ "" ]);
-  }
-});
+let output = process.argv.length == 4 ? process.argv[3] : process.argv[2].replace(new RegExp(".*/"), "");
+
+fetch(process.argv[2], {
+  method: "GET",
+  headers: {
+    'Content-Type': 'application/octet-stream',
+  },
+  responseType: "arraybuffer"
+}).
+  then((response) => {
+    if (!response.ok) {
+      console.error("Error http: " + response.statusText + " (" + response.status + ")");
+      process.exit(1);
+    } else {
+      return response.arrayBuffer();
+    }
+  }).
+  then((arraybuffer) => {
+    fs.writeFile(output, Buffer.from(arraybuffer), err => {
+      if (err) console.error(err);
+    });
+  });
+
+
+
+

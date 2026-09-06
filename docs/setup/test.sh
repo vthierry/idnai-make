@@ -12,7 +12,7 @@ idnai-test
 EOF
 
 cd idnai-test
-for p in sys web esp32 # numeric maple python 
+for p in sys web esp32 # numeric 
 do make install=idnai-$p
 done
 

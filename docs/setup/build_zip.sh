@@ -5,9 +5,8 @@ d="`dirname $0`" ; sketchbook="`realpath $d/../../..`"
 
 /bin/rm -rf $sandbox ; mkdir $sandbox ; cd $sandbox 
 cp $sketchbook/idnai-make/.gitignore .
-mkdir -p {bin,docs,src,node_modules}
-cp -r $sketchbook/idnai-{make,json} node_modules
-/bin/rm -rf node_modules/idnai-{make,json}/{.git,node_modules}
+mkdir -p {bin,docs,src}
+ln -s ../node_modules
 cat > makefile~ <<EOF
 ## The package metadata
 
