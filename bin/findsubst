@@ -1,5 +1,5 @@
 #!/bin/sh
-. ~/.bashrc
+export PATH="`dirname $0`:$PATH"
 
 usage() {
  cat <<EOF

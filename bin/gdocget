@@ -1,5 +1,5 @@
 #!/bin/bash
-. ~/.bashrc
+export PATH="`dirname $0`:$PATH"
 
 usage() {
  cat <<EOU
@@ -7,7 +7,7 @@ Usage: gdocget [-o $basename] [ -f $format] $url
 - Download a public google-drive document, spreadsheet, presentation, drawings or file.
 - Options:
   -  url: The whole google-drive URL, of the form 'https://docs.google.com/..'.
-  - -o: A local file name, the document google-drive ID by default.
+  - -o: A local file basename without extension, the document google-drive ID by default.
   - -f: The desired format, pdf by default, or, e.g., odt, ods, odp, odg for editable format.
 EOU
 }

@@ -13,4 +13,4 @@ Usage: subst $pattern $replacement [$input [$output]]
   exit();
 }
 
-transform(input => input.replace(new RegExp(process.argv[2], "gs"), process.argv[3]).trim(), argv.slice(4));
+transform(input => input.replace(new RegExp(process.argv[2], "gs"), process.argv[3]).trim(), process.argv.slice(4));
