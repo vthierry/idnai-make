@@ -7,6 +7,7 @@ confirm() {
 }
 
 backup() {
+  echo "backup $1"
   if [ -f "$1" ] ; then
     if [ "$2" = "-v" ] ; then echo "The file '$1' exists and is renamed appendig a '~' suffix." ; fi
     backup "$1~" ; mv "$1" "$1~"
