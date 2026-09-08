@@ -22,4 +22,7 @@ setup-install:
 	git add docs/setup/setup*.pdf
 #	Generates the setup archive
 	docs/setup/build_zip.sh
+#	Sync with remote
+	bin/git_sync
+
 
