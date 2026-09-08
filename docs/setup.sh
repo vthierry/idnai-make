@@ -26,7 +26,7 @@ then
 fi
 
 openurl() {
-  echo "Opening the $1 page" # ; $BROWSER "$2"
+  echo "Opening the $1 page" ; $BROWSER "$2"
 }
 
 ## Setup dialog #########################################################################
@@ -38,7 +38,7 @@ confirm "Are you in your sketchbook directory" "In that case:\n- Choose and/or c
 read -p "What is, please, your GitHub login: " -e login
 read -p "What is, please, the package name: " -e name
 
-if [ -z "`nodejs -e 'fetch(\"https://github.com/$login/$name\", { method: \"HEAD\" }).then((r) => { if (r.ok) console.log(\"ok\") });'`" ]
+if [ -z "`nodejs -e \"fetch('https://github.com/$login/$name', { method: 'HEAD' }).then((r) => { if (r.ok) console.log('ok') });\"`" ]
 then
   cat <<EOF
 Sorry https://github.com/$login/$name does not exist:
@@ -47,15 +47,15 @@ Sorry https://github.com/$login/$name does not exist:
 Please check and rerun.
 Bye.
 EOF
-  openurl "GitHub repository creation" "https://vthierry.github.io/idnai-make/docs/setup/setup-3.pdf"
+  openurl "GitHub repository creation" "https://vthierry.github.io/idnai-make/setup/setup-3.pdf"
   exit 1
 fi
 
 echo "[0/4] Installing useful packages, using sudo …"
-if \! dpkg-query -Wf'${db:Status}' nodejs 2>/dev/null ; then sudo apt install nodejs ; fi
+if ! dpkg-query -Wf'${db:Status}' nodejs 2>/dev/null ; then sudo apt install nodejs ; fi
 npm_packages_to_install=""
 for p in jsdoc docdash js-beautify markdown-it markdown-it-table-of-contents markdown-it-anchor http-server
-do if \! npm list --depth 1 --global $p 2>&1 > /dev/null ; then npm_packages_to_install="$npm_packages_to_install $p" ; fi
+do if ! npm list --depth 1 --global $p 2>&1 > /dev/null ; then npm_packages_to_install="$npm_packages_to_install $p" ; fi
 done
 if [ \! -z "$npm_packages_to_install" ] ; then sudo npm install -g $npm_package_to_install --silent ; fi
 sudo npm update -g --silent
@@ -81,7 +81,7 @@ fi
 if [ \! -L setup.sh ] ; then rm setup.sh ; ln -s node_modules/idnai-make/docs/setup.sh ; fi
 ## The package default files
 cd $name
-urlget "https://vthierry.github.io/idnai-make/docs/setup/setup.zip"
+urlget "https://vthierry.github.io/idnai-make/setup/setup.zip"
 unzip -o setup.zip ; rm setup.zip
 sed "s/@login/$login/" < makefile~ > makefile
 make install
@@ -93,4 +93,4 @@ git push origin master --force
 
 echo "[4/4] The next step is for you, to activate the documentation pages …"
 openurl "Activate web page settings" "https://github.com/$login/$name/settings/pages" 
-openurl "Activate web page settings documentation" "https://vthierry.github.io/idnai-make/docs/setup/setup-6.pdf" 
+openurl "Activate web page settings documentation" "https://vthierry.github.io/idnai-make/setup/setup-6.pdf" 
