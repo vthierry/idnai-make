@@ -4,13 +4,13 @@
 
 export SHELL := /bin/bash
 
-THE_MAKEFILES = makefile $(wildcard node_modules/*/src/makefile-rules.mk)
+THE_MAKEFILES = makefile $(wildcard ../node_modules/*/src/makefile-rules.mk)
 
 .SILENT: $(shell cat $(THE_MAKEFILES) | sed -n 's/^\([^:]*\):.*/\1/p')
 
 .NOTPARALLEL:
 
-export PATH := $(PWD)/bin $(PWD)/node_modules/.bin $(PATH)
+export PATH := ../node_modules/.bin:$(wildcard ../node_modules/*/bin):$(PATH)
 
 export NAME := $(notdir $(PWD))
 
@@ -48,9 +48,11 @@ usage: # Shows this usage
 INSTALL += ./node_modules ../node_modules/$(NAME) ../package.json ../node_modules/idnai-json/docs/wJSON.js README.md 
 
 install: $(INSTALL) # [=$package] Installs or updates, a given packages or all packages.
+### Here adds the dependency to the makefile and updates the package.json files
+	if [ -z "$(install)" ] ; then subst '(dependencies: [[^]]*)]' '$$1 $(install) ]' makefile ; $(MAKE) README.md ; fi
 	mkdir -p ../node_modules ; touch ../package-lock.json
 	chmod -R u+w ../node_modules ../package.json ../package-lock.json
-	cd .. ; npm install --silent $(install)
+	cd .. ; npm install --silent
 	chmod a-w ../node_modules ../package.json ../package-lock.json
 
 ## - Disclaimer: do NOT use `npm target` directly but `make target`.
@@ -99,8 +101,7 @@ build: # [=hostname[/path]] Builds targets defined by the makefile rules, locall
 ### Properly renders the markdown files (with the @frame tag, if any).
 
 docs/%.html: src/%.md
-	node_modules/idnai-make/bin/subst "@frame\\s+([^\\s]+)" "<p><center><iframe style='width: 100%; height: calc(66vh);' src='$1'></iframe></center><a href='$$1' target='_blank'>&nbsp;&nbsp;(open in new tab)</a></p>" $^ |\
-	node_modules/idnai-make/bin/md2html > $@
+	subst "@frame\\s+([^\\s]+)" "<p><center><iframe style='width: 100%; height: calc(66vh);' src='$1'></iframe></center><a href='$$1' target='_blank'>&nbsp;&nbsp;(open in new tab)</a></p>" $^ | md2html > $@
 
 ### Defines the API documentation and markdown file's rendering generation
 
@@ -134,7 +135,7 @@ ifneq (,$(shell which css-beautify))
 	for f in $(wildcard */*.css) ; do cp -p $$f $$f~ ; touch $$f~ -r $$f ; css-beautify -q -s 2 -n -r $$f ; touch $$f -r $$f~ ; done
 endif
 ifneq (,$(shell which uncrustify))
-	for f in $(wildcard src/*.hpp) $(wildcard src/*.cpp) $(wildcard src/*.C) ; do cp -p $$f $$f~ ; touch $$f~ -r $$f ; uncrustify -q -c node_modules/adnai-make/src/uncrustify.cfg -f $$f~ -o $$f ; touch $$f -r $$f~ ; done ; fi
+	for f in $(wildcard src/*.hpp) $(wildcard src/*.cpp) $(wildcard src/*.C) ; do cp -p $$f $$f~ ; touch $$f~ -r $$f ; uncrustify -q -c ../node_modules/idnai-make/src/uncrustify.cfg -f $$f~ -o $$f ; touch $$f -r $$f~ ; done ; fi
 endif
 
 #### Generates Python documentation if any
@@ -151,31 +152,32 @@ endif
 
 #### Installs the docdash template variant.
 
-node_modules/docdash2:
+../node_modules/docdash2:
 	mkdir -p $@
-	cp -rf node_modules/{docdash/{static,tmpl},idnai-make/src/docdash2/{publish.js,bin2doc,mk2doc}} $@
-	cp  ./docdash2/docdash2.js node_modules/jsdoc/plugins
+	cp -rf ../node_modules/{docdash/{static,tmpl},idnai-make/src/docdash2/{config.json,publish.js,bin2doc,mk2doc}} $@
+	cp  ./docdash2/docdash2.js ../node_modules/jsdoc/plugins
 
 #### Converts bin and make usage's documentations in jsdoc one.
 
-node_modules/docdash2/tmp_mk.js: $(THE_MAKEFILES)
+./.tmp/mk.js: $(THE_MAKEFILES)
+	mkdir -p $(@D)
 	(echo -e "/** @class make\n@description Usage: make \$$command, available commands: */" ;\
-	 node_modules/docdash2/mk2doc $^) > $@
+	 ../node_modules/docdash2/mk2doc $^) > $@
 
-node_modules/docdash2/tmp_bin.js : $(wildcard bin/[a-z0-9]*)
+./.tmp/bin.js : $(wildcard bin/[a-z0-9]*)
+	mkdir -p $(@D)
 	(echo -e "/** @class scripts\n@description Available scripts: */" ;\
-	 node_modules/docdash2/bin2doc $^) > $@
+	 ../node_modules/docdash2/bin2doc $^) > $@
 
 #### Runs jsdoc with linkcheck
 
-docs/index.html: README.md node_modules/docdash2 node_modules/docdash2/tmp/makefile.js $(wildcard */*.hpp) $(wildcard */*.js) $(wildcard */*.sh) $(wildcard */*.mpl)
-	jsdoc -c node_modules/adnai-make/src/docdash2/config.json -t node_modules/docdash2 -R README.md -d docs node_modules/docdash2/tmp_*.js $(sort $(wildcard *.js))
+docs/index.html: README.md ../node_modules/docdash2 .tmp/mk.js .tmp/bin.js $(wildcard */*.hpp) $(wildcard */*.js) $(wildcard */*.sh) $(wildcard */*.mpl)
+	jsdoc -c ../node_modules/docdash2/config.json -t ../node_modules/docdash2 -R README.md -d docs $(sort $(wildcard */*.js)) $(wildcard .tmp/*.js)
 
 linkcheck:
 	for l in `find docs -name '*.html' -exec grep 'href *=' {} \; | subst "[^\n]*href=['\"]([^'\"]*)['\"][^\n]*" "$$1" | sort -u` ;\
-	do if [ -z "`nodejs -e 'fetch(\"$$l\").then((r) => { if (!r.ok) console.log(\"ok\") });'" ] ;\
-	then echo "Broken link: $$l" ;\
-	fi done
+	do if [ -z "`urlexists $$l`" ] ; then echo "Broken link: $$l" ; fi ;\
+	done
 
 ### Defines maple processing for file generation.
 
@@ -265,13 +267,13 @@ ifneq (,$(CPP))
 OS=$(shell uname -s) 
 
 CPP_FLAGS = -g -fPIC -Wall -std=c++17 -O3 -D OS=$(OS) \
- $(patsubst %,-I%,$(wildcard node_modules/*/src) $(wildcard /usr/include/python3.*) /usr/local/Frameworks/Python.framework/Headers)
+ $(patsubst %,-I%,$(wildcard ../node_modules/*/src) $(wildcard /usr/include/python3.*) /usr/local/Frameworks/Python.framework/Headers)
 
 ifeq (-d,$(findstring -d,$(MAKEFLAGS)))
 CPP_FLAGS += -D DEBUG
 endif
 
-BUILD_CPP = $(patsubst %.mpl,%.mpl.out.txt,$(wildcard node_modules/*/src/*.mpl)) $(patsubst %_hpp.html,%.hpp,$(wildcard node_modules/*/src/*_hpp.html)) $(patsubst %.cpp,%.o,$(wildcard node_modules/*/src/*.cpp)) node_modules/libcpp.so $(patsubst src/%.C,bin/%,$(wildcard node_modules/*/src/*.C)) 
+BUILD_CPP = $(patsubst %.mpl,%.mpl.out.txt,$(wildcard src/*.mpl)) $(patsubst %_hpp.html,%.hpp,$(wildcard src/*_hpp.html)) ../node_modules/libcpp.so $(patsubst src/%.C,../node_modules/.bin/%,$(wildcard src/*.C)) 
 
 #### Automatic headers generation
 
@@ -283,7 +285,7 @@ BUILD_CPP = $(patsubst %.mpl,%.mpl.out.txt,$(wildcard node_modules/*/src/*.mpl))
 %.o: %.cpp
 	$(CPP) -c $(CPP_FLAGS) $^
 
-node_modules/libcpp.so : $(patsubst %.cpp,%.o,$(wildcard node_modules/*/src/*.cpp))
+../node_modules/libcpp.so : $(patsubst %.cpp,%.o,$(wildcard ../node_modules/*/src/*.cpp))
 	$(CPP) -o $@ -fPIC -shared $^
 
 CPP_LIBS = node_modules/libcpp.so -lstdc++ -lm $(shell find /usr/lib -name 'libpython3.*.so' | head -1)
@@ -291,7 +293,7 @@ ifneq (mingw64,$(OS))
 CPP_LIBS  += -lcurl
 endif
 
-node_modules/.bin/%: src/%.C
+../node_modules/.bin/%: src/%.C
 	$(CPP) -o $@ $(CPP_FLAGS) $^ $(CPP_LIBS)
 
 endif
@@ -304,7 +306,7 @@ test: # [=file] [argv="arg1 …"] Runs a given src/$file file, if specified, or 
 	  if [ \! -z "$(TEST)" ] ; then $(MAKE) $(TEST) ; fi \
         else \
 	  switch($(suffix $(test))) { \
-	    case 'C' : $(MAKE) $(BUILD_CPP) ; $(MAKE) test=node_modules_/.bin/$(basename) $(test)) $(argv) ;;\
+	    case 'C' : $(MAKE) $(BUILD_CPP) ; $(MAKE) test=../node_modules/.bin/$(basename $(test)) $(argv) ;;\
 	    case 'sh' : case 'js' : chmod a+rx src/$(test) ; ./src/$(test) $(argv) ;;\
             case 'py' : python3 ./src/(test) ;;\
 	    case 'mpl' : $(MAKE) ./src/$(test).out.txt ;;\
@@ -325,7 +327,7 @@ ifneq (,$(which gdb))
 gtest: $(BUILD_CPP) # [=file] [argv="arg1 …"] Runs a given CPP file with gdb, for debug.
 	if [ -z "$(gtest)" ] ; then test="test" ; else test="$(basename $(gtest))" ; fi \
 	unset DEBUGINFOD_URLS ;	(echo "break exit" ; echo "run $(argv)" ; echo "echo --- backtrace ------------------------------------------------------------------------------\n" ; echo "backtrace" ; echo "echo --- backtrace full -------------------------------------------------------------------------\n" ; echo "backtrace full" ; echo "quit 0") > /tmp/a.cmd ;\
-	gdb -n -q node_modules_/.bin/$$test -x /tmp/a.cmd --return-child-result 2>&1 ; ok=
+	gdb -n -q ../node_modules/.bin/$$test -x /tmp/a.cmd --return-child-result 2>&1 ; ok=
 else 
 	echo "You need to `sudo apt install gdb` for `make gtest`."
 endif
@@ -333,9 +335,9 @@ endif
 ifneq (,$(which valgrind))
 vtest: $(BUILD_CPP) # [=file] [argv="arg1 …"] Runs a given CPP file with valgrinddebug.
 	if [ -z "$(vtest)" ] ; then test="test" ; else test="$(basename $(vtest))" ; fi \
-	ulimit -s 100000 2>/dev/null ; export GLIBCXX_FORCE_NEW=1 ; valgrind --max-stackframe=100000000 --track-origins=yes node_modules_/.bin/$$ $(argv)
+	ulimit -s 100000 2>/dev/null ; export GLIBCXX_FORCE_NEW=1 ; valgrind --max-stackframe=100000000 --track-origins=yes ../node_modules/.bin/$$test $(argv)
 else 
-	echo "You need to `sudo apt install valgrind` for `make gtest`."
+	echo "You need to `sudo apt install valgrind` for `make vtest`."
 endif
 
 ## Demo
@@ -360,7 +362,7 @@ endif
 BUILD += $(BUILD_API) $(BUILD_LATEX) $(BUILD_CPP) $(BUILD_ESP32)
 
 clean: # Removes all targets defined by the makefile rules.
-	node_modules/idnai-make/bin/clean
+	clean
 	/bin/rm -rf $(BUILD)
 
 rebuild: clean build  # Cleans and builds all targets defined by the makefile rules.
@@ -392,7 +394,7 @@ stop: # [=$port] Stops, if not yet done, a local 'http:127.0.0.1:$port' server, 
 ## Force synchronization with respect to git repositories
 
 sync: # [=$message] Synchronizes files with respect to the github repositories.
-	node_modules/idnai-make/bin/git_sync $(sync)
+	git_sync $(sync)
 
 ## Force synchronization with respect to git repositories
 

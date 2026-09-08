@@ -6,7 +6,6 @@ d="`dirname $0`" ; sketchbook="`realpath $d/../../..`"
 /bin/rm -rf $sandbox ; mkdir $sandbox ; cd $sandbox 
 cp $sketchbook/idnai-make/.gitignore .
 mkdir -p {bin,docs,src}
-ln -s ../node_modules
 cat > makefile~ <<EOF
 ## The package metadata
 
@@ -69,8 +68,8 @@ BUILD =
 TEST = 
 DEMO = 
 
-ifneq (,\$(ls node_modules/*/src/makefile-rules.mk))
-include node_modules/*/src/makefile-rules.mk
+ifneq (,\$(wildcard ../node_modules/*/src/makefile-rules.mk))
+include ../node_modules/*/src/makefile-rules.mk
 endif
 
 ## Package specific rules are defined below:

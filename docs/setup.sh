@@ -7,15 +7,14 @@ confirm() {
 }
 
 backup() {
-  echo "backup $1"
-  if [ -f "$1" ] ; then
+  if [ -e "$1" ] ; then
     if [ "$2" = "-v" ] ; then echo "The file '$1' exists and is renamed appendig a '~' suffix." ; fi
     backup "$1~" ; mv "$1" "$1~"
   fi
 }
 
 urlget() {
-  nodejs -e "const fs = require('fs'); fetch('$1', { method: 'GET', headers: { 'Content-Type': 'application/octet-stream', }, responseType: 'arraybuffer'}).then((r) => { return r.arrayBuffer(); }).then((b) => { fs.writeFile('$1'.replace(new RegExp('.*/'), ''), Buffer.from(b)); })";
+  nodejs -e "const fs = require('fs'); fetch('$1', { method: 'GET', headers: { 'Content-Type': 'application/octet-stream' }, responseType: 'arraybuffer'}).then((r) => { return r.arrayBuffer(); }).then((b) => { console.log(Buffer.from(b)); fs.writeFile('$1'.replace(new RegExp('.*/'), ''), Buffer.from(b), err => { }); })";
 }
 
 if [ -z "$BROWSER" ]
@@ -53,44 +52,42 @@ EOF
 fi
 
 echo "[0/4] Installing useful packages, using sudo …"
-if ! dpkg-query -Wf'${db:Status}' nodejs 2>/dev/null ; then sudo apt install nodejs ; fi
-npm_packages_to_install=""
-for p in jsdoc docdash js-beautify markdown-it markdown-it-table-of-contents markdown-it-anchor http-server
-do if ! npm list --depth 1 --global $p 2>&1 > /dev/null ; then npm_packages_to_install="$npm_packages_to_install $p" ; fi
-done
-if [ \! -z "$npm_packages_to_install" ] ; then sudo npm install -g $npm_package_to_install --silent ; fi
-sudo npm update -g --silent
+#if ! dpkg-query -Wf'${db:Status}' nodejs 2>/dev/null ; then sudo apt install nodejs ; fi
+#for p in jsdoc docdash js-beautify markdown-it markdown-it-table-of-contents markdown-it-anchor http-server
+#do if ! npm list --depth 1 --global $p 2>&1 > /dev/null ; then sudo npm install $p --global --silent ; fi
+#done
+#sudo npm update --global --silent
 
 echo "[1/4] Cloning your repository, using ssh …"
-backup $name -v
-git clone git@github.com:$login/$name.git
+#backup $name -v
+#git clone --quiet git@github.com:$login/$name.git 2>&1 | grep -v 'warning:.*empty repository'
 
 echo "[2/4] Installing a few useful files …"
 ### The global sketchbook/node_modules/idnai-make
-if [ \! -f node_modules/idnai-make ]
+if [ \! -d ./node_modules/idnai-make ]
 then
-  mkdir -p node_modules
-  if [ -d idnai-make ]
+  if [ \! -d idnai-make ]
   then
-    cd node_modules ; ln -s ../idnai-make ; cd ..
-  else
     urlget "https://github.com/vthierry/idnai-make/archive/refs/heads/main.zip"
     unzip idnai-make-main.zip ; rm idnai-make-main.zip 
     mv idnai-make-main node_modules/idnai-make
   fi
 fi
+make -C ./node_modules/idnai-make install
+exit
 if [ \! -L setup.sh ] ; then rm setup.sh ; ln -s node_modules/idnai-make/docs/setup.sh ; fi
 ## The package default files
 cd $name
 urlget "https://vthierry.github.io/idnai-make/setup/setup.zip"
-unzip -o setup.zip ; rm setup.zip
+unzip -q -o setup.zip ; rm setup.zip
 sed "s/@login/$login/" < makefile~ > makefile
+exit
 make install
 
 echo "[3/4] Updating the GitHub repository …"
 git add makefile bin docs
-git commit -a -m "setup as an idnai-* driven package"
-git push origin master --force
+git commit --quiet -a -m "setup as an idnai-* driven package"
+git push --quiet origin master --force
 
 echo "[4/4] The next step is for you, to activate the documentation pages …"
 openurl "Activate web page settings" "https://github.com/$login/$name/settings/pages" 
