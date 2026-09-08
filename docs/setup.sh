@@ -70,12 +70,12 @@ then
   then
     urlget "https://github.com/vthierry/idnai-make/archive/refs/heads/main.zip"
     unzip idnai-make-main.zip ; rm idnai-make-main.zip 
-    mv idnai-make-main node_modules/idnai-make
+    mv idnai-make-main ./node_modules/idnai-make
   fi
 fi
 make -C ./node_modules/idnai-make install
 exit
-if [ \! -L setup.sh ] ; then rm setup.sh ; ln -s node_modules/idnai-make/docs/setup.sh ; fi
+if [ \! -L setup.sh ] ; then rm setup.sh ; ln -s ./node_modules/idnai-make/docs/setup.sh ; fi
 ## The package default files
 cd $name
 urlget "https://vthierry.github.io/idnai-make/setup/setup.zip"

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-// Internal usage: makefile2readmetx ; Builds the ./README.md, ./package.json, ./docs/index.html (if needed) files, from the metadata, and check the correct git configuration.
+// Internal usage: mk2package ; Builds from the makefile metadata, the ./README.md, {.,..}/package.json, ./docs/index.html files.
 
 const fs = require("fs");
 const { execSync } = require("child_process");
@@ -221,7 +221,7 @@ ${os}$\
   writeLockedFileSync("package.json", npmpackage, false, true);
 }
 
-// Generates the sketchbook package.json file.
+// Updates the sketchbook package.json file.
 {
   execSync("chmod u+w ../package.json");
   let p = JSON.parse(fs.readFileSync("../package.json"));
