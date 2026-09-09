@@ -5,7 +5,7 @@ if (process.argv.length > 2 && ["-h", "--help"].includes(process.argv[2]) || pro
 Usage: urlexists $url
 - Returns an empty string if the URL is available, else the HTTP response status.
 `);
-  exit();
+  process.exit();
 }
 
 fetch(process.argv[2], { method: "HEAD" }).then((response) => {

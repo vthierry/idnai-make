@@ -14,7 +14,7 @@ backup() {
 }
 
 urlget() {
-  nodejs -e "const fs = require('fs'); fetch('$1', { method: 'GET', headers: { 'Content-Type': 'application/octet-stream' }, responseType: 'arraybuffer'}).then((r) => { return r.arrayBuffer(); }).then((b) => { console.log(Buffer.from(b)); fs.writeFile('$1'.replace(new RegExp('.*/'), ''), Buffer.from(b), err => { }); })";
+  if ! nodejs -e "const fs = require('fs'); fetch('$1', { method: 'GET', headers: { 'Content-Type': 'application/octet-stream' }, responseType: 'arraybuffer'}).then(r => { if (r.ok) return r.arrayBuffer(); else { console.error('Unable to reach $1: are you connected and is https://github.com online ?'); process.exit(1); } }).then(b => { fs.writeFile('$1'.replace(new RegExp('.*/'), ''), Buffer.from(b), e => { }); })" ; then exit 1; fi
 }
 
 if [ -z "$BROWSER" ]
@@ -74,7 +74,6 @@ then
   fi
 fi
 make -C ./node_modules/idnai-make install
-exit
 if [ \! -L setup.sh ] ; then rm setup.sh ; ln -s ./node_modules/idnai-make/docs/setup.sh ; fi
 ## The package default files
 cd $name

@@ -2,37 +2,53 @@
 
 const fs = require("fs");
 
+const { inspect } = require('node:util');
+
 if (process.argv.length > 2 && ["-h", "--help"].includes(process.argv[2]) || ![3, 4].includes(process.argv.length)) {
   console.log(`
-Usage: urlget $url [$file]
+Usage: urlget $url [$file|-]
 - Saves the URL unique page, if available, in a file.
-  - The file default name is given by the URL basename.
+  - The output file default name is given by the URL basename.
+- The URL page is output on stdout, if using '-' as second argument.
 `);
-  exit();
+  process.exit();
 }
 
-let output = process.argv.length == 4 ? process.argv[3] : process.argv[2].replace(new RegExp(".*/"), "");
-
-fetch(process.argv[2], {
-  method: 'GET',
-  headers: {
-    'Content-Type': 'application/octet-stream'
-  },
-  responseType: 'arraybuffer'
-}).
-  then((response) => {
-    if (!response.ok) {
-      console.error("Error http: " + response.statusText + " (" + response.status + ")");
-      process.exit(1);
-    } else {
-      return response.arrayBuffer();
-    }
+if (process.argv.length == 4 && process.argv[3] == "-") {
+  fetch(process.argv[2]).
+    then(response => {
+      if (!response.ok) {
+	console.error("Error http: " + response.statusText + " (" + response.status + ")");
+	process.exit(1);
+      } else {
+	return response.text();
+      }
+    }).
+    then(console.log);
+} else {
+  fetch(process.argv[2], {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/octet-stream'
+    },
+    responseType: 'arraybuffer'
   }).
-  then((arraybuffer) => {
-    fs.writeFile(output, Buffer.from(arraybuffer), err => {
-      if (err) console.error(err);
+    then(response => {
+      // console.dir(response, { depth: null }); // allows to dump the whole response tree
+      if (!response.ok) {
+	console.error("Error http: " + response.statusText + " (" + response.status + ")");
+	process.exit(1);
+      } else {
+	return response.arrayBuffer();
+      }
+    }).
+    then(arraybuffer => {
+      let output = process.argv.length == 4 ? process.argv[3] : process.argv[2].replace(new RegExp(".*/"), "");
+      fs.writeFile(output, Buffer.from(arraybuffer), err => {
+	if (err) console.error(err);
+      });
     });
-  });
+}
 
 
 

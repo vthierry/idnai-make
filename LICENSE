@@ -1,0 +1,15 @@
+[
+  {
+    "type": "CeCILL-C",
+    "url": "https://en.wikipedia.org/wiki/CeCILL",
+    "for": "source-code"
+  },
+  {
+    "type": "CC-BY",
+    "url": "https://creativecommons.org/licenses/by/4.0/legalcode",
+    "for": [
+      "documents",
+      "multimedia"
+    ]
+  }
+]

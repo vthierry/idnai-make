@@ -8,7 +8,7 @@ Usage: md2html [$markdown-input [$html-output]]
 - Renders a markdown input in HTML.
   - The default output and input are stdout and stdin respectively.
 `);
-  exit();
+  process.exit();
 }
 const MarkdownIt = require("markdown-it");
 let md = new MarkdownIt();

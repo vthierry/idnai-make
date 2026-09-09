@@ -10,7 +10,7 @@ Usage: subst $pattern $replacement [$input [$output]]
   - The default output and input are stdout and stdin respectively.
   - The input and output can be the same file.
 `);
-  exit();
+  process.exit();
 }
 
 transform(input => input.replace(new RegExp(process.argv[2], "gs"), process.argv[3]).trim(), process.argv.slice(4));
