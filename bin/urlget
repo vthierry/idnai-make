@@ -44,6 +44,13 @@ if (process.argv.length == 4 && process.argv[3] == "-") {
     }).
     then(arraybuffer => {
       let output = process.argv.length == 4 ? process.argv[3] : process.argv[2].replace(new RegExp(".*/"), "");
+      const bakfile = function(file) {
+	if (fs.existsSync(file)) {
+	  bakfile(file + "~");
+	  fs.renameSync(file, file + "~");
+	}
+      };
+      bakfile(output);
       fs.writeFile(output, Buffer.from(arraybuffer), err => {
 	if (err) console.error(err);
       });

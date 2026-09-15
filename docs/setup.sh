@@ -6,10 +6,10 @@ confirm() {
   read -p "$1? (y/N) : " -n 1 -e rep ; if [ "$rep" = "y" ] ; then true ; else if [ \! -z "$exit_message" ] ; then echo -e "$exit_message" ; exit 1 ; fi ; false ; fi
 }
 
-backup() {
+bakfile() {
   if [ -e "$1" ] ; then
     if [ "$2" = "-v" ] ; then echo "The file '$1' exists and is renamed appendig a '~' suffix." ; fi
-    backup "$1~" ; mv "$1" "$1~"
+    bakfile "$1~" ; mv "$1" "$1~"
   fi
 }
 
@@ -59,22 +59,24 @@ echo "[0/4] Installing useful packages, using sudo …"
 #sudo npm update --global --silent
 
 echo "[1/4] Cloning your repository, using ssh …"
-#backup $name -v
-#git clone --quiet git@github.com:$login/$name.git 2>&1 | grep -v 'warning:.*empty repository'
+bakfile $name -v
+git clone --quiet git@github.com:$login/$name.git 2>&1 | grep -v 'warning:.*empty repository'
 
 echo "[2/4] Installing a few useful files …"
 ### The global sketchbook/node_modules/idnai-make
 if [ \! -d ./node_modules/idnai-make ]
 then
-  if [ \! -d idnai-make ]
+  if [ -d ./idnai-make ]
   then
+    cd ./node_modules ; ln -s ../idnai-make ; cd ..
+  else
     urlget "https://github.com/vthierry/idnai-make/archive/refs/heads/main.zip"
     unzip idnai-make-main.zip ; rm idnai-make-main.zip 
     mv idnai-make-main ./node_modules/idnai-make
   fi
 fi
 make -C ./node_modules/idnai-make install
-if [ \! -L setup.sh ] ; then rm setup.sh ; ln -s ./node_modules/idnai-make/docs/setup.sh ; fi
+if [ \! -L ./setup.sh ] ; then /bin/rm -f setup.sh ; ln -s ./node_modules/idnai-make/docs/setup.sh ; fi
 ## The package default files
 cd $name
 urlget "https://vthierry.github.io/idnai-make/setup/setup.zip"

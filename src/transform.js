@@ -13,9 +13,9 @@ function transform(transform, argv) {
   let error = function(message) {
     throw new Error(message);
   };
-  let backup = function(file) {
+  let bakfile = function(file) {
     if (fs.existsSync(file)) {
-      backup(file + "~");
+      bakfile(file + "~");
       fs.renameSync(file, file + "~");
     }
   };
@@ -26,7 +26,7 @@ function transform(transform, argv) {
       error(`File not found: '${argv[0]}'`);
   let output = transform(input);
   if (argv.length == 2) {
-    backup(argv[1]);
+    bakfile(argv[1]);
     fs.writeFileSync(argv[1], output);
   } else
     console.log(output);
