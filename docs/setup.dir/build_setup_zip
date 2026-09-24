@@ -93,12 +93,10 @@ EOF
  cat $sketchbook/idnai-make/src/makefile-rules.mk
  echo 'endif') > ./sketchbook/idnai-setup/src/makefile-rules.mk
 
-### Builds an zip archive for the setup script
-zip -9qr $sketchbook/idnai-make/docs/setup.dir/setup.zip * .*
+### Builds a zip archive for the setup script
+zip="$sketchbook/idnai-make/docs/setup.dir/setup.zip"
+/bin/rm -f $zip ; zip -9qr $zip * .* ; git add $zip
 
 ### Cleans up the temporary directory
 cd .. ; /bin/rm -rf .~
-
-### Adds to the repository if not yet done
-git add $sketchbook/idnai-make/docs/setup.dir/setup.zip
 
