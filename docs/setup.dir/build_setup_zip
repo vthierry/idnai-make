@@ -1,11 +1,20 @@
 #!/bin/bash
 
-sandbox="/tmp/snadox-$$"
+# Private usage: Builds the idnai-make/docs/setup.dir/setup.zip file
+
+## Gets the sketchbook root directory
 d="`dirname $0`" ; sketchbook="`realpath $d/../../..`"
 
-/bin/rm -rf $sandbox ; mkdir $sandbox ; cd $sandbox 
+## Builds a sandbox temporary directory 
+/bin/rm -rf .~ ; mkdir .~ ; cd .~
+
+### Copies the default .gitignore file
 cp $sketchbook/idnai-make/.gitignore .
-mkdir -p {bin,docs,src}
+
+### Creates the default directories
+mkdir -p {bin,docs,src,sketchbook/idnai-setup/src}
+
+### Creates the default makefile
 cat > makefile~ <<EOF
 ## The package metadata
 
@@ -58,7 +67,7 @@ endef
 ## A notepad area to freely write local todo list, short-term shared issues, bug or caveat reports, and todo list in weak-markdown syntax..
 define notepad
   - Something to do.
-  - A idea noted here to avoid forgetting. 
+  - A idea noted here to avoid forgetting it. 
 endef
 
 ## Defines package specific target, if any, and include all framework rules.
@@ -68,18 +77,28 @@ BUILD =
 TEST = 
 DEMO = 
 
-ifneq (,\$(wildcard ../node_modules/*/src/makefile-rules.mk))
-include ../node_modules/*/src/makefile-rules.mk
+ifneq (,\$(wildcard ./node_modules/*/src/makefile-rules.mk))
+include ./node_modules/*/src/makefile-rules.mk
 endif
 
 ## Package specific rules are defined below:
 
-nothing:
-	echo "Nothing is more that not anything"
+something:
+	echo "Nothing to do, in fact"
 
 EOF
-zip -9qr $sketchbook/idnai-make/docs/setup/setup.zip * .*
-/bin/rm -rf $sandbox
-cd $sketchbook/idnai-make/docs/setup
-git add setup.zip
+
+### Creates idnai-make/src/makefile-rules.mk mirror to be used if idnai-make is not installed
+(echo 'ifeq (,$(wildcard ./node_modules/idnai-make/src/makefile-rules.mk))'
+ cat $sketchbook/idnai-make/src/makefile-rules.mk
+ echo 'endif') > ./sketchbook/idnai-setup/src/makefile-rules.mk
+
+### Builds an zip archive for the setup script
+zip -9qr $sketchbook/idnai-make/docs/setup.dir/setup.zip * .*
+
+### Cleans up the temporary directory
+cd .. ; /bin/rm -rf .~
+
+### Adds to the repository if not yet done
+git add $sketchbook/idnai-make/docs/setup.dir/setup.zip
 

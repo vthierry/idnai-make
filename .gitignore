@@ -1,7 +1,16 @@
+# Local files not commited on the git repository
+
+## Backup and temporary file and directory
 *~
+.~
+
+## Third-party packages installation
 /package.json
 /package-lock.json
 /node_modules
-wifi.h
-/.tmp
+
+## Files with private data
+/src/wifi.h
+/bin/.isItOn
+
 

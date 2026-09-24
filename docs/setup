@@ -33,7 +33,7 @@ openurl() {
 
 confirm "This script will set up an idnai-* driven package, is it OK" "Bye."
 
-confirm "Are you in your sketchbook directory" "In that case:\n- Choose and/or create sketchbook directory, for instance, '~/sketchbook/'.\n- Move this 'setup.sh' script in it.\n- Rerun this script.\nBye."
+confirm "Are you in your sketchbook directory" "In that case:\n- Choose and/or create sketchbook directory, for instance, '~/sketchbook/'.\n- Move this 'setup' script in it.\n- Rerun this script.\nBye."
 
 read -p "What is, please, your GitHub login: " -e login
 read -p "What is, please, the package name: " -e name
@@ -47,43 +47,24 @@ Sorry https://github.com/$login/$name does not exist:
 Please check and rerun.
 Bye.
 EOF
-  openurl "GitHub repository creation" "https://vthierry.github.io/idnai-make/setup/setup-3.pdf"
+  openurl "GitHub repository creation" "https://vthierry.github.io/idnai-make/setup.dir/setup-3.pdf"
   exit 1
 fi
 
-echo "[0/4] Installing useful packages, using sudo …"
-#if ! dpkg-query -Wf'${db:Status}' nodejs 2>/dev/null ; then sudo apt install nodejs ; fi
-#for p in jsdoc docdash js-beautify markdown-it markdown-it-table-of-contents markdown-it-anchor http-server
-#do if ! npm list --depth 1 --global $p 2>&1 > /dev/null ; then sudo npm install $p --global --silent ; fi
-#done
-#sudo npm update --global --silent
+if ! dpkg-query -Wf'${db:Status}' nodejs 2>/dev/null ; then sudo apt install nodejs ; fi
 
 echo "[1/4] Cloning your repository, using ssh …"
 bakfile $name -v
 git clone --quiet git@github.com:$login/$name.git 2>&1 | grep -v 'warning:.*empty repository'
 
 echo "[2/4] Installing a few useful files …"
-### The global sketchbook/node_modules/idnai-make
-if [ \! -d ./node_modules/idnai-make ]
-then
-  if [ -d ./idnai-make ]
-  then
-    cd ./node_modules ; ln -s ../idnai-make ; cd ..
-  else
-    urlget "https://github.com/vthierry/idnai-make/archive/refs/heads/main.zip"
-    unzip idnai-make-main.zip ; rm idnai-make-main.zip 
-    mv idnai-make-main ./node_modules/idnai-make
-  fi
-fi
-make -C ./node_modules/idnai-make install
-if [ \! -L ./setup.sh ] ; then /bin/rm -f setup.sh ; ln -s ./node_modules/idnai-make/docs/setup.sh ; fi
-## The package default files
 cd $name
-urlget "https://vthierry.github.io/idnai-make/setup/setup.zip"
+urlget "https://vthierry.github.io/idnai-make/setup.dir/setup.zip"
 unzip -q -o setup.zip ; rm setup.zip
 sed "s/@login/$login/" < makefile~ > makefile
-exit
 make install
+
+exit
 
 echo "[3/4] Updating the GitHub repository …"
 git add makefile bin docs
@@ -92,4 +73,4 @@ git push --quiet origin master --force
 
 echo "[4/4] The next step is for you, to activate the documentation pages …"
 openurl "Activate web page settings" "https://github.com/$login/$name/settings/pages" 
-openurl "Activate web page settings documentation" "https://vthierry.github.io/idnai-make/setup/setup-6.pdf" 
+openurl "Activate web page settings documentation" "https://vthierry.github.io/idnai-make/setup.dir/setup-6.pdf" 

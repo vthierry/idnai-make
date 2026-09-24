@@ -6,7 +6,7 @@ export SHELL := /bin/bash
 
 THE_MAKEFILES = makefile $(wildcard ../node_modules/*/src/makefile-rules.mk)
 
-.SILENT: $(shell cat $(THE_MAKEFILES) | sed -n 's/^\([^:]*\):.*/\1/p')
+#.SILENT: $(shell cat $(THE_MAKEFILES) | sed -n 's/^\([^:]*\):.*/\1/p')
 
 .NOTPARALLEL:
 
@@ -56,24 +56,31 @@ install: install_node_modules README.md # [=$package] Installs or updates, a giv
 ## - Disclaimer: do NOT use `npm target` directly but `make target`.
 ## - Generates the README.md, package.json, and other installation file, and install what is needed.
 ## - Hint: The INSTALL target's variable can be defined in makefile for package specific targets, taken into account after standard install.
-## - Note: a link of the present package is created in node_modules for homogeneity.
+## - Note: a link of the present package is created in node_modules for build homogeneity.
 
-install_node_modules: ./node_modules ../node_modules ../node_modules/$(NAME) ../package.json ../package-lock.json
+install_node_modules: ../node_modules ./node_modules ../node_modules/$(NAME) ../package.json ../package-lock.json
+
+../node_modules:
+	mkdir -p $@
+# 	The idnai-setup/src/makefile-rules.mk used when no local idnai-make installation
+	if [ -d ./node_modules/idnai-setup ] ; mv ./sketchbook/idnai-setup $@ ; /bin/rm -rf ./node_modules ; fi
+	chmod a-w $@
 
 ./node_modules:
 	ln -s ../node_modules
 
-../node_modules:
-	mkdir -p $@
-	chmod a-w $@
-
 ../node_modules/$(NAME): 
 	chmod u+w ../node_modules
 	cd ../node_modules ; ln -s ../$(NAME)
+ifeq (idnai-make,$(NAME))
+#	The idnai-make installation yields some sketchbook installation cleaning
+	/bin/rm -rf ../node_modules/idnai-setup
+	cd .. ; if [ \! -L setup ] ; then /bin/rm -f setup ; ln -s ./node_modules/idnai-make/docs/setup ; fi
+endif
 	chmod a-w ../node_modules
 
 ../package.json:
-	echo -e "{\n  \"description\": \"This defines the sketchbook local shared packages.\",\n  \"dependencies\": {},\n  \"DISCLAIMER\": \"BETTER NOT EDIT (AUTOMATICALLY GENERATED)\"\n}" > $@
+	echo -e "{\n  \"description\": \"This defines the sketchbook local shared packages.\",\n  \"dependencies\": { },\n  \"DISCLAIMER\": \"BETTER NOT EDIT (AUTOMATICALLY GENERATED)\"\n}" > $@
 	chmod a-w $@
 
 ../package-lock.json:
@@ -162,20 +169,20 @@ endif
 
 #### Converts bin and make usage's documentations in jsdoc one.
 
-./.tmp/mk.js: $(THE_MAKEFILES)
+./.~/mk.js: $(THE_MAKEFILES)
 	mkdir -p $(@D)
 	(echo -e "/** @class make\n@description Usage: make \$$command, available commands: */" ;\
 	 ../node_modules/docdash2/mk2doc $^) > $@
 
-./.tmp/bin.js : $(wildcard bin/[a-z0-9]*)
+./.~/bin.js : $(wildcard bin/[a-z0-9]*)
 	mkdir -p $(@D)
 	(echo -e "/** @class scripts\n@description Available scripts: */" ;\
 	 ../node_modules/docdash2/bin2doc $^) > $@
 
 #### Runs jsdoc with linkcheck
 
-docs/index.html: README.md ../node_modules/docdash2 .tmp/mk.js .tmp/bin.js $(wildcard */*.hpp) $(wildcard */*.js) $(wildcard */*.sh) $(wildcard */*.mpl)
-	jsdoc -c ../node_modules/docdash2/config.json -t ../node_modules/docdash2 -R README.md -d docs $(sort $(wildcard */*.js)) $(wildcard .tmp/*.js)
+docs/index.html: README.md ../node_modules/docdash2 .~/mk.js .~/bin.js $(wildcard */*.hpp) $(wildcard */*.js) $(wildcard */*.sh) $(wildcard */*.mpl)
+	jsdoc -c ../node_modules/docdash2/config.json -t ../node_modules/docdash2 -R README.md -d docs $(sort $(wildcard */*.js)) $(wildcard .~/*.js)
 
 linkcheck:
 	for l in `find docs -name '*.html' -exec grep 'href *=' {} \; | subst "[^\n]*href=['\"]([^'\"]*)['\"][^\n]*" "$$1" | sort -u` ;\
