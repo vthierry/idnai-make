@@ -63,7 +63,7 @@ install_node_modules: ../node_modules ./node_modules ../node_modules/$(NAME) ../
 ../node_modules:
 	mkdir -p $@
 # 	The idnai-setup/src/makefile-rules.mk used when no local idnai-make installation
-	if [ -d ./node_modules/idnai-setup ] ; mv ./sketchbook/idnai-setup $@ ; /bin/rm -rf ./node_modules ; fi
+	if [ -d ./node_modules/idnai-setup ] ; then mv ./sketchbook/idnai-setup $@ ; /bin/rm -rf ./node_modules ; fi
 	chmod a-w $@
 
 ./node_modules:
