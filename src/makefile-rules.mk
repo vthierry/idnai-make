@@ -53,7 +53,7 @@ install: install_node_modules README.md # [=$package] Installs or updates, a giv
 	chmod a-w ../{node_modules,package.json,package-lock.json}
 	$(MAKE) $(INSTALL)
 
-## - Disclaimer: do NOT use `npm target` directly but `make target`.
+## - Disclaimer: better NOT use `npm target` directly but `make target`.
 ## - Generates the README.md, package.json, and other installation file, and install what is needed.
 ## - Hint: The INSTALL target's variable can be defined in makefile for package specific targets, taken into account after standard install.
 ## - Note: a link of the present package is created in node_modules for build homogeneity.
