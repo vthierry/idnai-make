@@ -12,7 +12,7 @@ d="`dirname $0`" ; sketchbook="`realpath $d/../../..`"
 cp $sketchbook/idnai-make/.gitignore .
 
 ### Creates the default directories
-mkdir -p {bin,docs,src,sketchbook/idnai-setup/src}
+mkdir -p {bin,docs,src,node_modules/idnai-setup/src}
 
 ### Creates the default makefile
 cat > makefile~ <<EOF
@@ -91,7 +91,7 @@ EOF
 ### Creates idnai-make/src/makefile-rules.mk mirror to be used if idnai-make is not installed
 (echo 'ifeq (,$(wildcard ./node_modules/idnai-make/src/makefile-rules.mk))'
  cat $sketchbook/idnai-make/src/makefile-rules.mk
- echo 'endif') > ./sketchbook/idnai-setup/src/makefile-rules.mk
+ echo 'endif') > ./node_modules/idnai-setup/src/makefile-rules.mk
 
 ### Builds a zip archive for the setup script
 zip="$sketchbook/idnai-make/docs/setup.dir/setup.zip"
