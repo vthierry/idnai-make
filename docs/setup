@@ -26,7 +26,7 @@ then
 fi
 
 openurl() {
-  echo "Opening the $1 page" ; $BROWSER "$2"
+  echo -e "$1" ; $BROWSER "$2" >/dev/null
 }
 
 ## Setup dialog #########################################################################
@@ -55,22 +55,23 @@ if ! dpkg-query -Wf'${db:Status}' nodejs 2>/dev/null ; then sudo apt install nod
 
 echo "[1/4] Cloning your repository, using ssh …"
 bakfile $name -v
-git clone --quiet git@github.com:$login/$name.git 2>&1 | grep -v 'warning:.*empty repository'
+git clone --quiet git@github.com:$login/$name.git
 
 echo "[2/4] Installing a few useful files …"
 cd $name
-urlget "https://vthierry.github.io/idnai-make/setup.dir/setup.zip"
+if [ -f ../idnai-make/docs/setup.dir/setup.zip ]
+then cp ../idnai-make/docs/setup.dir/setup.zip .
+else urlget "https://vthierry.github.io/idnai-make/setup.dir/setup.zip"
+fi
 unzip -q -o setup.zip ; rm setup.zip
 sed "s/@login/$login/" < makefile~ > makefile
 make install
 
-exit
-
 echo "[3/4] Updating the GitHub repository …"
-git add makefile bin docs
+git add .gitignore makefile bin docs src
 git commit --quiet -a -m "setup as an idnai-* driven package"
-git push --quiet origin master --force
+git push --quiet --force
 
-echo "[4/4] The next step is for you, to activate the documentation pages …"
-openurl "Activate web page settings" "https://github.com/$login/$name/settings/pages" 
-openurl "Activate web page settings documentation" "https://vthierry.github.io/idnai-make/setup.dir/setup-6.pdf" 
+echo "[4/4] Next step: please, manually activate the web pages:"
+openurl "\tIn the Pages settings" "https://github.com/$login/$name/settings/pages" 
+openurl "\tUsing the related documentation" "https://vthierry.github.io/idnai-make/setup.dir/setup-6.pdf" 

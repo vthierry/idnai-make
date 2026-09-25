@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Private usage: Builds the idnai-make/docs/setup.dir/setup.zip file
+# Private usage: build_setup_zip ; Builds the idnai-make/docs/setup.dir/setup.zip file
 
 ## Gets the sketchbook root directory
 d="`dirname $0`" ; sketchbook="`realpath $d/../../..`"
@@ -12,7 +12,7 @@ d="`dirname $0`" ; sketchbook="`realpath $d/../../..`"
 cp $sketchbook/idnai-make/.gitignore .
 
 ### Creates the default directories
-mkdir -p {bin,docs,src,node_modules/idnai-setup/src}
+mkdir -p {bin,docs,src,node_modules/idnai-make}
 
 ### Creates the default makefile
 cat > makefile~ <<EOF
@@ -32,7 +32,7 @@ define package #=> This defines the GitHub package metadata in json5 syntax (see
 #    { name: "J. Doe" mail: someone@somewhere.com url: https://github.com/\$login role: developer }
 #  ]
 #  os: [ Linux, armv7l, esp32, Darwin, mingw64 ] # An optional list of targeted operating-systems.
-  dependencies: [ idnai-make ] # The other packages required to run this one, if not present 'idnai-make' is added.
+  dependencies: [ idnai-make ] # The packages required to run this one, if not present 'idnai-make' is added.
 }
 endef
 
@@ -88,10 +88,9 @@ something:
 
 EOF
 
-### Creates idnai-make/src/makefile-rules.mk mirror to be used if idnai-make is not installed
-(echo 'ifeq (,$(wildcard ./node_modules/idnai-make/src/makefile-rules.mk))'
- cat $sketchbook/idnai-make/src/makefile-rules.mk
- echo 'endif') > ./node_modules/idnai-setup/src/makefile-rules.mk
+### Creates a local temporary version of idnai-make if not installed
+$sketchbook/idnai-make/bin/clean $sketchbook/idnai-make/{src,bin}
+cp -r $sketchbook/idnai-make/{src,bin} ./node_modules/idnai-make
 
 ### Builds a zip archive for the setup script
 zip="$sketchbook/idnai-make/docs/setup.dir/setup.zip"

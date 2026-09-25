@@ -1,0 +1,37 @@
+#!/bin/bash
+
+# Private usage: test_setup ; Tests the setup and install mechanism installing the idnai-test package
+
+## Cd in the sketchbook
+cd `dirname $0`/../../../
+
+## Cleans previous local and indani-test repository files
+
+for f in ./{node_modules,package.json,package-lock.json} idnai-test* idnai-make/docs/setup.dir/setup.zip
+do (chmod u+w $f ; /bin/rm -rf $f) 2>/dev/null
+done
+git clone --quiet git@github.com:vthierry/idnai-test.git
+cd idnai-test
+for f in .gitignore bin docs LICENSE makefile* node_modules package* README.md src
+do (chmod u+w $f ; git rm --quiet -rf $f ; /bin/rm -rf $f) 2>/dev/null
+done
+git commit --quiet -a -m 'Test repository reset' 2>/dev/null
+git push --quiet
+cd ..
+/bin/rm -rf idnai-test
+
+## Rebuilds the file bundle
+make -C idnai-make docs/setup.dir/setup.zip
+
+## Runs the setup
+echo -e "yyvthierry\nidnai-test\n" | idnai-make/docs/setup
+
+## Somes dumps
+#> ls -l ./node_modules ; cat ./package.json
+
+## Installs core package to test
+cd idnai-test
+make install=idnai-make
+#make install=idnai-json
+#make install=idnai-sys
+

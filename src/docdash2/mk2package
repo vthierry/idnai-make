@@ -1,15 +1,24 @@
 #!/usr/bin/env node
 
+const debug = false;
+
 // Internal usage: mk2package ; Builds from the makefile metadata, the ./README.md, {.,..}/package.json, ./docs/index.html files.
 
 const fs = require("fs");
+const path = require("path");
 const { execSync } = require("child_process");
-
 const wJSON = require(process.argv[1]+"/../wJSON.js");
 
-// Reads the package part of the makefile.
+const sketchbook = path.normalize(process.argv[1]+"/../../../../..");
+const bin = "../node_modules/idnai-make/bin";
 
-let input = wJSON.parse((""+fs.readFileSync("makefile")).replace(new RegExp(".*define *package *\n(.*)\nendef.*", "gs"), "$1"));
+// Reads the package part of the makefile
+
+const header = "# Package idnai-* meta-data\n";
+let input = (""+fs.readFileSync("makefile")).replace(new RegExp(".*define *package[^\n]*\n", "gs"), header).replace(new RegExp("\nendef.*", "gs"), "");
+if (!input.startsWith(header)) throw new error("The `define package` section is missing in the makefile");
+if (debug) console.log("Input from makefile : `"+input+"\n`");
+input = wJSON.parse(input);
 input["git"] = fs.existsSync(".git");
 
 // File writing with the proper options
@@ -23,7 +32,7 @@ writeLockedFileSync = function(filename, text, git, lock) {
     execSync("git add " + filename);
 }
 
-// Manages singleton lists.
+// Manages singleton lists
 {
   if ("keyword" in input) {
     if (!("keywords" in input))
@@ -46,7 +55,7 @@ writeLockedFileSync = function(filename, text, git, lock) {
   }
 }
 
-// Manages implicit fields.
+// Manages implicit fields
 {
   if (!("name" in input))
     input["name"] = require("path").basename(require("process").env.PWD);
@@ -60,7 +69,7 @@ writeLockedFileSync = function(filename, text, git, lock) {
       input["issues"] = { url: `https://github.com/${input["login"]}/${input["name"]}/issues` };
     if (!("description" in input)) {
       let p = `https://github.com/${input["login"]}/${input["name"]}`;
-      let t = ""+execSync(`../node_modules/idnai-make/bin/urlget ${p} -`);
+      let t = ""+execSync(`${bin}/urlget ${p} -`);
       input["description"] = t.replace(new RegExp(".*class=\"SidebarAbout-module__description[^>]*>([^<]*).*", "gs"), "$1");
     }
     if (input["contributors"].filter(c => c["login"] == input["login"] || c["url"] == `https://github.com/${input["login"]}`).length == 0) {
@@ -80,7 +89,10 @@ writeLockedFileSync = function(filename, text, git, lock) {
     ];
   if (input["name"] != "idnai-make" && input["dependencies"].indexOf("idnai-make") == -1)
     input["dependencies"].push("idnai-make");
+  input["dependencies"].push(input["name"]);
 }
+
+if (debug) console.log(JSON.stringify(input, null, 2));
 
 // Manages dependencies
 
@@ -89,11 +101,11 @@ let dependencies = JSON.parse("{"+input["dependencies"].map(dependency =>
     if (dependency.match(new RegExp("[a-zA-Z0-9_-]*"))) {
       // Detects a local installation
       if (fs.existsSync(`../${dependency}`) && fs.statSync(`../${dependency}`).isDirectory())
-	return `"${dependency}": "file:../${dependency}"`;
+	return `"${dependency}": "file:${sketchbook}/${dependency}"`;
       // Detects a personal git repository
       {
 	try {
-	  if (""+execSync(`../node_modules/idnai-make/bin/urlexists https://github.com/${input["login"]}/$dependency ${dependency}`) == "")
+	  if (""+execSync(`${bin}/urlexists https://github.com/${input["login"]}/$dependency ${dependency}`) == "")
 	    return `"${dependency}": "https://github.com/${input["login"]}/${dependency}"`;
 	} catch(err) {}
       }
@@ -107,7 +119,7 @@ let dependencies = JSON.parse("{"+input["dependencies"].map(dependency =>
       // Detects an idnai-* package
       if (dependency.match(new RegExp("^idnai-"))) {
 	try {
-	  if (""+execSync(`../node_modules/idnai-make/bin/urlexists https://github.com/vthierry/${dependency}`) == "")
+	  if (""+execSync(`${bin}/urlexists https://github.com/vthierry/${dependency}`) == "")
 	    return `"${dependency}": "https://github.com/vthierry/${dependency}"`;
 	} catch(err) {}
       }
@@ -117,7 +129,7 @@ let dependencies = JSON.parse("{"+input["dependencies"].map(dependency =>
     // Considers a GitHub URL
     if (dependency.match(new RegExp("[a-zA-Z0-9_-]*/[a-zA-Z0-9_-]*"))) {
       	try {
-	  if (""+execSync(`../node_modules/idnai-make/bin/urlexists https://github.com/${dependency}`) == "")
+	  if (""+execSync(`${bin}/urlexists https://github.com/${dependency}`) == "")
 	    return `"${dependency.replace(new RegExp("[a-zA-Z0-9_-]*/([a-zA-Z0-9_-]*)", "gs"), "$1")}": "https://github.com/${dependency}"`;
 	} catch(err) {}
     }
@@ -127,11 +139,11 @@ let dependencies = JSON.parse("{"+input["dependencies"].map(dependency =>
       let url = dependency.replace("git+", "").replace("ssh", "https");
       return `"${name}": "${url}"`;
     }
-    // The dependency is not parsed, given as it.
+    // The dependency is not parsed, given as it
     return `"${dependency}": "latest"`;
    }).join(",")+"}");
 
-// Generates the README.md.
+// Generates the README.md
 
 if((!fs.existsSync("README.md")) || fs.statSync("README.md").mtime < fs.statSync("makefile").mtime) {
   let intro = fs.existsSync("src/introduction.md") ? ((""+fs.readFileSync("src/introduction.md")).
@@ -142,7 +154,7 @@ if((!fs.existsSync("README.md")) || fs.statSync("README.md").mtime < fs.statSync
   let keywords = "keywords" in input ? `- keywords: [${input["keywords"]}]\n`: "";
   let homepage = "homepage" in input ? `- homepage: [${input["homepage"]}](${input["homepage"]}) for documentation\n` : "";
   let now = new Date().toISOString().substring(0, 16);
-  let license = "- license: " + input["licenses"].map(license => ("url" in license ? ("[" + ("type" in license ? license["type"] : license["url"]) + "](" + license["url"] + ")") : "type" in license ? license["type"] : "")+("for" in license ? "\\" + license["for"] : "")).join(",");
+  let license = "- license: " + input["licenses"].map(license => ("url" in license ? ("[" + ("type" in license ? license["type"] : license["url"]) + "](" + license["url"] + ")") : "type" in license ? license["type"] : "")+("for" in license ? " for " + license["for"] : "")).join(", ");
   let contributors = "- contributors: " + input["contributors"].map(contributor => ("name" in contributor ? `"${contributor["name"]}"` : "") + ("email" in contributor ? `<[${contributor["email"]}](mailto:${contributor["email"]})>` : "") + ("url" in contributor ? `([${contributor["url"]}](${contributor["url"]}))` : "") + ("role" in contributor ? ` is a ${contributor["role"]}` : ""));
   let issues = "issues" in input && "url" in input ["issues"] ? `- issues: [on this link](${input["issues"]["url"]})\n` : "";
   let os = "os" in input ? `- available-os: ${input ["os"]}\n` : "";
@@ -154,25 +166,27 @@ ${intro}
 ${keywords}${homepage}- version: ${input["version"]} at ${now}
 ${license}
 ${contributors}
-- repository: ${input["repository"]}
-${issues}${os}- dependencies: ${input["dependencies"]}
+- repository: ${wJSON.stringify(input["repository"])}
+${issues}${os}- dependencies: ${input["dependencies"].filter(c => c != input["name"])}
 
-## Package installation options:
+## Package installation:
 
 - Adds \`${input["login"]}/${input["name"]}\` to the dependencies list of another package.
+  - Or …
 - Runs \`npm install git+${input["repository"]["url"]}\` in a \`npm\` target directory.
+  - Or …
 - Runs \`git clone ${input["repository"]["url"]}\` in a sketchbook directory.
 `;
   writeLockedFileSync("README.md", readme, true, true);
 }
 
-// Generates the LICENSE.
+// Generates the LICENSE
 
 if((!fs.existsSync("LICENSE")) || fs.statSync("LICENSE").mtime < fs.statSync("makefile").mtime) {
   writeLockedFileSync("LICENSE", JSON.stringify(input["licenses"], null, 2), true, true);
 }
 
-// Generates the local package.json file.
+// Generates the local package.json file
 
 if((!fs.existsSync("package.json")) || fs.statSync("package.json").mtime < fs.statSync("makefile").mtime) {
   let license = input["licenses"].map(license => license["type"]).join(",");
@@ -194,14 +208,14 @@ ${os}\
   writeLockedFileSync("package.json", npmpackage, false, true);
 }
 
-// Updates the sketchbook package.json file.
+// Updates the sketchbook package.json file
 {
   let p = JSON.parse(fs.readFileSync("../package.json"));
   Object.assign(p["dependencies"], dependencies);
   writeLockedFileSync("../package.json", JSON.stringify(p, null, 2), false, true);
 }
 
-// Creates a minimal homepage, if not yet done.
+// Creates a minimal homepage, if not yet done
 {
   if (!fs.existsSync("docs/index.html")) {
     fs.mkdirSync("docs", { recursive: true });

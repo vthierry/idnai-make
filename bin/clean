@@ -2,26 +2,17 @@
 
 if [ "$1" = -h -o "$1" = --help ]
 then cat <<EOU
-Usage: cleans [\$directory]
+Usage: cleans [\$directory…]
 - Cleans all standard temporary files.
   - The default directory is '.'.
+  
 EOU
 exit
 fi
 
-## Changes directory if given
-
-if [ \! -z "$1" ] ; then
-  if [ -d "$1" ] ; then
-    cd "$1"
-  else
-    echo "The '$1' directory is not found." ; exit 1
-  fi
-fi
-
-## Cleans all known temporary files
-
-find . \( -type f -o -type d \) -a \( \
+clean()
+{
+  find "$*" \( -type f -o -type d \) -a \( \
      -name '#*' -o \
      -name '.#*' -o \
      -name '*%' -o \
@@ -49,3 +40,9 @@ find . \( -type f -o -type d \) -a \( \
      -name '*.snm' -o \
      -name '*.sol' \) \
      -exec /bin/rm -rf {} \; 2>/dev/null
+}
+
+if [ -z "$*" ]
+then clean "."
+else for d in $* ; do clean $d ; done
+fi

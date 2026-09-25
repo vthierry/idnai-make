@@ -2,7 +2,7 @@
 
 ## Backup and temporary file and directory
 *~
-.~
+.*~
 
 ## Third-party packages installation
 /package.json
