@@ -48,43 +48,37 @@ usage: # Shows this usage
 install: install_node_modules README.md # [=$package] Installs or updates, a given packages or all packages.
 #	Adds the dependency to the makefile and updates the package.json files
 	if [ \! -z "$(install)" ] ; then subst '(dependencies: [[^]]*)]' '$$1 $(install) ]' makefile makefile ; $(MAKE) README.md ; fi
-#	
-	chmod u+w ../{node_modules,package.json,package-lock.json}
-	cd .. ; npm install --loglevel silent
+#	Runs npm install controling the log output
+	cd .. ;\
+	/bin/rm -rf ~/.npm/_logs ;\
+	chmod u+w ./{node_modules,package.json,package-lock.json} ;\
+	npm install --silent ; e=$$? ;\
+	chmod a-w ./{node_modules,package.json,package-lock.json} ;\
+	if [ $$e \!= 0 ] ; then echo "npm install: " ; grep -v -E '^[0-9]* (verbose|info|timing|silly)' ~/.npm/_logs/*.log ; exit -2 ; fi
 ifneq (,$(INSTALL))
 	$(MAKE) $(INSTALL)
 endif
-	chmod a-w ../{node_modules,package.json,package-lock.json}
 
 ## - Disclaimer: better NOT use `npm target` directly but `make target`.
 ## - Generates the README.md, package.json, and other installation file, and install what is needed.
 ## - Hint: The INSTALL target's variable can be defined in makefile for package specific targets, taken into account after standard install.
 ## - Note: a link of the present package is created in node_modules for build homogeneity.
 
-install_node_modules: ../node_modules ./node_modules ../node_modules/$(NAME) ../package.json ../package-lock.json
+install_node_modules: ../node_modules ../package.json ../package-lock.json ./node_modules
 
 ../node_modules:
 	mkdir -p $@
 # 	Installs a temporary version of idnai-make if not yet installed at the sketchbook level
-	if [ \! -e ../node_modules/idnai-make ] ; then mv ./node_modules/idnai-make $@ ; fi ; /bin/rm -rf ./node_modules
+	if [ \( \! -e ../node_modules/idnai-make \) && \( -d ./node_modules/idnai-make \) ] ; then mv ./node_modules/idnai-make $@ ; fi ; /bin/rm -rf ./node_modules
 #	Protects against manual manipulation
 	chmod a-w $@
-
-./node_modules:
-	ln -s ../node_modules
-
-../node_modules/$(NAME): 
 ifeq (idnai-make,$(NAME))
 #	Installs a version of the setup script up to date with respect to the idnai-make package
 	cd .. ; if [ \! -L setup ] ; then /bin/rm -f setup ; ln -s ./node_modules/idnai-make/docs/setup ; fi
 endif
-	chmod u+w ../node_modules
-#	Removes a previously fixed installed version of this package 
-	/bin/rm -rf ../node_modules/$(NAME)
-#	Installs this package at the sketchbook level for homogeneous build
-	cd ../node_modules ; ln -s $(PWD)/$(NAME)
-#	Protects against manual manipulation
-	chmod a-w ../node_modules
+
+./node_modules:
+	ln -s ../node_modules
 
 ../package.json:
 	echo -e "{\n  \"description\": \"This defines the sketchbook local shared packages.\",\n  \"dependencies\": { },\n  \"DISCLAIMER\": \"BETTER NOT EDIT (AUTOMATICALLY GENERATED)\"\n}" > $@

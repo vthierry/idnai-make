@@ -9,7 +9,8 @@ const path = require("path");
 const { execSync } = require("child_process");
 const wJSON = require(process.argv[1]+"/../wJSON.js");
 
-const sketchbook = path.normalize(process.argv[1]+"/../../../../..");
+const sketchbook = path.normalize(process.env.PWD+"/..");
+if (debug) console.log("Sketchbook path: " + sketchbook);
 const bin = "../node_modules/idnai-make/bin";
 
 // Reads the package part of the makefile
@@ -17,7 +18,7 @@ const bin = "../node_modules/idnai-make/bin";
 const header = "# Package idnai-* meta-data\n";
 let input = (""+fs.readFileSync("makefile")).replace(new RegExp(".*define *package[^\n]*\n", "gs"), header).replace(new RegExp("\nendef.*", "gs"), "");
 if (!input.startsWith(header)) throw new error("The `define package` section is missing in the makefile");
-if (debug) console.log("Input from makefile : `"+input+"\n`");
+if (debug) console.log("Makefile input: `"+input+"\n`");
 input = wJSON.parse(input);
 input["git"] = fs.existsSync(".git");
 
@@ -92,16 +93,21 @@ writeLockedFileSync = function(filename, text, git, lock) {
   input["dependencies"].push(input["name"]);
 }
 
-if (debug) console.log(JSON.stringify(input, null, 2));
+if (debug) console.log("Processed input: " + JSON.stringify(input, null, 2));
 
 // Manages dependencies
 
 let dependencies = JSON.parse("{"+input["dependencies"].map(dependency =>
   {
     if (dependency.match(new RegExp("[a-zA-Z0-9_-]*"))) {
-      // Detects a local installation
-      if (fs.existsSync(`../${dependency}`) && fs.statSync(`../${dependency}`).isDirectory())
+      // Detects a local installation and enforces a symbolic link
+      if (fs.existsSync(`../${dependency}`) && fs.statSync(`../${dependency}`).isDirectory()) {
+	execSync(`chmod u+w ${sketchbook}/node_modules`);
+	execSync(`/bin/rm -rf ${sketchbook}/node_modules/${dependency}`);
+	execSync(`cd ${sketchbook}/node_modules ; ln -s ${path.normalize("../" + dependency)}`);
+	execSync(`chmod u-w ${sketchbook}/node_modules`);
 	return `"${dependency}": "file:${sketchbook}/${dependency}"`;
+      }
       // Detects a personal git repository
       {
 	try {
@@ -142,6 +148,8 @@ let dependencies = JSON.parse("{"+input["dependencies"].map(dependency =>
     // The dependency is not parsed, given as it
     return `"${dependency}": "latest"`;
    }).join(",")+"}");
+
+if (debug) console.log("Computed dependencies: " + dependencies);
 
 // Generates the README.md
 
@@ -191,10 +199,11 @@ if((!fs.existsSync("LICENSE")) || fs.statSync("LICENSE").mtime < fs.statSync("ma
 if((!fs.existsSync("package.json")) || fs.statSync("package.json").mtime < fs.statSync("makefile").mtime) {
   let license = input["licenses"].map(license => license["type"]).join(",");
   let os = "os" in input ? `  "os":  ${JSON.stringify(input["os"])},\n` : "";
+  let keywords = "keywords" in input ? `"keywords": ${JSON.stringify(input["keywords"])},\n` : "";
   let npmpackage = `{
   "name": "${input["name"]}",
   "description": "${input["description"]}",
-  "keywords": ${JSON.stringify(input["keywords"])},
+${keywords}\
   "version": "${input["version"]}",
   "homepage": "${input["homepage"]}",
   "bugs": ${JSON.stringify(input["issues"])},

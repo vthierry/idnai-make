@@ -4,16 +4,18 @@
 
 - keywords: [raspberry,esp32,web-service,weak-json]
 - homepage: [https://vthierry.github.io/idnai-make](https://vthierry.github.io/idnai-make) for documentation
-- version: 0.0.1 at 2026-09-15T17:12
-- license: [CeCILL-C](https://en.wikipedia.org/wiki/CeCILL)\source-code,[CC-BY](https://creativecommons.org/licenses/by/4.0/legalcode)\documents,multimedia
+- version: 0.0.1 at 2026-09-25T13:03
+- license: [CeCILL-C](https://en.wikipedia.org/wiki/CeCILL) for source-code, [CC-BY](https://creativecommons.org/licenses/by/4.0/legalcode) for documents,multimedia
 - contributors: ([https://github.com/vthierry](https://github.com/vthierry)) is a developer
-- repository: [object Object]
+- repository: { type: git url: "https://github.com/vthierry/idnai-make" }
 - issues: [on this link](https://github.com/vthierry/idnai-make/issues)
 - available-os: Linux,armv7l,esp32,mingw64
 - dependencies: jsdoc,docdash,js-beautify,markdown-it,markdown-it-table-of-contents,markdown-it-anchor
 
-## Package installation options:
+## Package installation:
 
 - Adds `vthierry/idnai-make` to the dependencies list of another package.
+  - Or …
 - Runs `npm install git+https://github.com/vthierry/idnai-make` in a `npm` target directory.
+  - Or …
 - Runs `git clone https://github.com/vthierry/idnai-make` in a sketchbook directory.

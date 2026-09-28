@@ -1,0 +1,28 @@
+{
+  "name": "idnai-make",
+  "description": "« I Dont Need A.I. »: an agnostic, parsimonious, self-evident, coding framework.",
+  "keywords": ["raspberry","esp32","web-service","weak-json"],
+  "version": "0.0.1",
+  "homepage": "https://vthierry.github.io/idnai-make",
+  "bugs": {"url":"https://github.com/vthierry/idnai-make/issues"},
+  "license": "CeCILL-C,CC-BY",
+  "repository": {"type":"git","url":"https://github.com/vthierry/idnai-make"},
+  "contributors": [
+    {
+      "login": "vthierry",
+      "url": "https://github.com/vthierry",
+      "role": "developer"
+    }
+  ],
+  "os":  ["Linux","armv7l","esp32","mingw64"],
+  "dependencies": {
+    "jsdoc": "latest",
+    "docdash": "latest",
+    "js-beautify": "latest",
+    "markdown-it": "latest",
+    "markdown-it-table-of-contents": "latest",
+    "markdown-it-anchor": "latest",
+    "idnai-make": "file:/local/data/mnemosyne/aide/idnai-make/idnai-make"
+  },
+  "DISCLAIMER": "BETTER NOT EDIT (AUTOMATICALLY GENERATED)"
+}
