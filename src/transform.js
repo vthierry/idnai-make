@@ -21,7 +21,6 @@ function transform(transform, argv) {
   };
   let input =
       argv.length == 0 ? fs.readFileSync(process.stdin.fd, "utf-8") :
-      argv[0] == "" ? "" :
       fs.existsSync(argv[0]) ? fs.readFileSync(argv[0], "utf-8") :
       error(`File not found: '${argv[0]}'`);
   let output = transform(input);

@@ -93,20 +93,16 @@ README.md: makefile
 
 ## Manages build rules
 
-build: # [=$hostname[/$path]] Builds targets defined by the makefile rules, locally or on an accessible host, path=~/sketchbook by default.
+build: # [=[oar|ssh]:$host[/$path]] Builds targets defined by the makefile rules, locally or on an accessible host.
 	if [ -z "$(build)" ] ;\
 	then $(MAKE) $(BUILD_ALL) $(BUILD) ;\
-	else \
-	  $(MAKE) sync ;\
-	  if [ "$(notdir ($build))" = "$(build)" ] ;\
-	  then d="~/sketchbook" ;\
-	  else d="$(notdir ($build))" ;\
-	  fi ;\
-	  ssh "`echo '$(build)' | sed 's/\/.*//g'`" -c "cd $$d/$(NAME) ; make sync build sync" ;\
-	fi
+	else $(MAKE) sync ; ./node_modules/idnai-make/src $(build) 'make sync build sync' ; fi
 
 ## - Partial installation policy:
 ##   - If a software is missing, the rule is silently ignored, assuming it is processed from another checkout.
+## - Remote execution:
+##   - It uses the `rrun` remote execution scripts, see its usage for details.
+##   - The $path is assumed to correspond to a git package installation of the same package on the remote host.
 ## - Hint: The BUILD target's variable can be defined in makefile for package specific targets, built after standard targets.
 
 ### Properly renders the markdown files (with the @frame tag, if any).

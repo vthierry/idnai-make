@@ -62,10 +62,8 @@ git clone --quiet git@github.com:$login/$name.git
 cd $name
 
 echo "[2/4] Installing a few useful files …"
-if [ -f ../idnai-make/docs/setup.dir/setup.zip ]
+if [ -f ../idnai-make/docs/setup.dir/setup.zip ] # This if a local installation exists
 then cp ../idnai-make/docs/setup.dir/setup.zip .
-elif [ -f ../../idnai-make/docs/setup.dir/setup.zip ]
-then cp ../../idnai-make/docs/setup.dir/setup.zip .
 else urlget "https://vthierry.github.io/idnai-make/setup.dir/setup.zip"
 fi
 unzip -q -o setup.zip ; rm setup.zip
