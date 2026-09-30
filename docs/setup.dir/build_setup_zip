@@ -59,7 +59,8 @@ endef
 ###     - If on GitHub it can the abbreviated as '\$another-login/\$another-name'.
 ###
 ### - The operating-system list is useful to better specify the package target.
-###   - It uses 'uname -s' (e.g., 'armv7l' for RaspberryPi, 'Darwin' for MacOS Linux layer, 'mingw64' for windows Linux layer).
+###   - It uses `uname -s | tr '[:upper:]' '[:lower:]'`
+###     - (e.g., 'linux' for Linux, 'armv7l' for RaspberryPi, 'darwin' for MacOS Linux layer, 'mingw64' for windows linux layer).
 ###
 ### - When done, these installation comments and notes can be cleaned.
 ###

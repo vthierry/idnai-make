@@ -95,7 +95,7 @@ writeLockedFileSync = function(filename, text, git, lock) {
   input["dependencies"].push(input["name"]);
 }
 
-if (debug) console.log("Processed input: " + JSON.stringify(input, null, 2));
+if (true) console.log("Processed input: " + JSON.stringify(input, null, 2));
 
 // Manages dependencies
 
