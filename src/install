@@ -38,11 +38,11 @@ fi
 
 ### Installs a version of the setup script with respect to the idnai-make active package.
 if [ \( \! -L ../setup \) -a \( -f ./node_modules/idnai-make/docs/setup \) ]
-then cd .. ; chmod --quiet u+w setup ; /bin/rm -f setup ; ln -s ./node_modules/idnai-make/docs/setup ; chmod u-w setup ; cd $name
+then cd .. ; chmod --quiet u+w setup ; /bin/rm -f setup ; ln -s ./node_modules/idnai-make/docs/setup ; cd $name
 fi
 
 ## Updates ./package.json from the makefile metadata.
-./node_modules/idnai-make/src/install.dir/mk2package
+$0.dir/mk2package
 
 ## Runs npm install
 chmod u+w ../{node_modules,package.json,package-lock.json}
@@ -56,7 +56,7 @@ echo -n "OK3 " ; ls -1 ../node_modules | tr "\n" " "
 
 ### Runs npm install controlling the output.
 /bin/rm -rf ~/.npm/_logs
-cd .. ; npm install --silent ; e="$?" ; cd $name #### Via the log file, because the direct default output contains spurious meta-characters.
+cd .. ; cat package.json ; npm install --silent ; e="$?" ; cd $name #### Via the log file, because the direct default output contains spurious meta-characters.
 if [ "$e" \!= 0 ] ; then echo "npm install: " ; grep -v -E '^[0-9]* (verbose|info|timing|silly|http fetch)' ~/.npm/_logs/*.log ; exit 2 ; fi
 
 chmod a-w ../{node_modules,package.json,package-lock.json}

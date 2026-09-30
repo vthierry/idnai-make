@@ -64,7 +64,9 @@ if [ -f $0.dir/setup.zip ]
 then cp $0.dir/setup.zip .
 else urlget "https://vthierry.github.io/idnai-make/setup.dir/setup.zip"
 fi
+
 cd $name
+
 unzip -q -o ../setup.zip ; /bin/rm ../setup.zip
 sed "s/@login/$login/" < makefile~ > makefile ; /bin/rm makefile~
 make install
