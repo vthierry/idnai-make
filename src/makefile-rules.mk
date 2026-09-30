@@ -59,7 +59,7 @@ endif
 ## - Note: a link of the present package is created in node_modules for build homogeneity.
 
 README.md: makefile
-	./node_modules/idnai-make/src/mk2package
+	./node_modules/idnai-make/src/install.dir/mk2package
 	chmod a-w $@
 
 ## Manages build rules

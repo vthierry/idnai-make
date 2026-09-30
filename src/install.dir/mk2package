@@ -9,11 +9,11 @@ const debug = false;
 const fs = require("fs");
 const path = require("path");
 const { execSync } = require("child_process");
-const wJSON = require(process.argv[1]+"/../wJSON.js");
+const wJSON = require(path.normalize(process.argv[1]+"/../wJSON.js"));
 
 const sketchbook = path.normalize(process.env.PWD+"/..");
 if (debug) console.log("Sketchbook path: " + sketchbook);
-const bin = "../node_modules/idnai-make/bin";
+const bin = path.normalize(process.argv[1]+"/../../../bin");
 
 // Reads the package part of the makefile
 
