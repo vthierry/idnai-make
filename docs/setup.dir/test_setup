@@ -9,6 +9,7 @@ cd `dirname $0`/../../../
 sudo /bin/rm -rf sketchbook_sandox
 ## Rebuilds the file bundle
 make -C idnai-make -B docs/setup.dir/setup.zip
+cd idnai-make ; bin/git_sync ; cd ..
 
 ## Works in a sandbox directory
 mkdir sketchbook_sandox ; cd sketchbook_sandox
