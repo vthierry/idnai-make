@@ -45,16 +45,10 @@ usage: # Shows this usage
 
 ## Installation operations
 
-install: install_node_modules README.md # [=$package] Installs or updates, a given packages or all packages.
+install: # [=$package] Installs or updates, a given packages or all packages.
 #	Adds the dependency to the makefile and updates the package.json files
-	if [ \! -z "$(install)" ] ; then subst '(dependencies: [[^]]*)]' '$$1 $(install) ]' makefile makefile ; $(MAKE) README.md ; fi
-#	Runs npm install controling the log output
-	cd .. ;\
-	/bin/rm -rf ~/.npm/_logs ;\
-	chmod u+w ./{node_modules,package.json,package-lock.json} ;\
-	npm install --silent ; e=$$? ;\
-	chmod a-w ./{node_modules,package.json,package-lock.json} ;\
-	if [ $$e \!= 0 ] ; then echo "npm install: " ; grep -v -E '^[0-9]* (verbose|info|timing|silly)' ~/.npm/_logs/*.log ; exit -2 ; fi
+	if [ \! -z "$(install)" ] ; then subst '(dependencies: [[^]]*)]' '$$1 $(install) ]' makefile makefile ; fi
+	./node_modules/idnai-make/src/install
 ifneq (,$(INSTALL))
 	$(MAKE) $(INSTALL)
 endif
@@ -64,39 +58,16 @@ endif
 ## - Hint: The INSTALL target's variable can be defined in makefile for package specific targets, taken into account after standard install.
 ## - Note: a link of the present package is created in node_modules for build homogeneity.
 
-install_node_modules: ../node_modules ../package.json ../package-lock.json ./node_modules
-
-../node_modules:
-	mkdir -p $@
-# 	Installs a temporary version of idnai-make if not yet installed at the sketchbook level
-	if [ \( \! -e ../node_modules/idnai-make \) && \( -d ./node_modules/idnai-make \) ] ; then mv ./node_modules/idnai-make $@ ; fi ; /bin/rm -rf ./node_modules
-#	Protects against manual manipulation
-	chmod a-w $@
-ifeq (idnai-make,$(NAME))
-#	Installs a version of the setup script up to date with respect to the idnai-make package
-	cd .. ; if [ \! -L setup ] ; then /bin/rm -f setup ; ln -s ./node_modules/idnai-make/docs/setup ; fi
-endif
-
-./node_modules:
-	ln -s ../node_modules
-
-../package.json:
-	echo -e "{\n  \"description\": \"This defines the sketchbook local shared packages.\",\n  \"dependencies\": { },\n  \"DISCLAIMER\": \"BETTER NOT EDIT (AUTOMATICALLY GENERATED)\"\n}" > $@
-	chmod a-w $@
-
-../package-lock.json:
-	touch $@
-	chmod a-w $@
-
 README.md: makefile
-	./node_modules/idnai-make/src/docdash2/mk2package
+	./node_modules/idnai-make/src/mk2package
+	chmod a-w $@
 
 ## Manages build rules
 
 build: # [=[oar|ssh]:$host[/$path]] Builds targets defined by the makefile rules, locally or on an accessible host.
 	if [ -z "$(build)" ] ;\
 	then $(MAKE) $(BUILD_ALL) $(BUILD) ;\
-	else $(MAKE) sync ; ./node_modules/idnai-make/src $(build) 'make sync build sync' ; fi
+	else $(MAKE) sync ; ./node_modules/idnai-make/bin/rrun $(build) 'make sync build sync' ; fi
 
 ## - Partial installation policy:
 ##   - If a software is missing, the rule is silently ignored, assuming it is processed from another checkout.

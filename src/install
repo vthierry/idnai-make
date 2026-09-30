@@ -1,0 +1,64 @@
+#!/bin/bash
+
+# Internal usage: install ; Implements a idnai- driven package installation.
+
+## Installs the idnai- driven file architecture.
+
+sketchbook="`dirname $PWD`"
+name="`basename $PWD`"
+
+error_if_exists() {
+  if [ -e $1 ] ; then echo "Spurious file architecture, check and remove '$1', then rerun." ; exit 1 ; fi
+}
+
+### Creates a global npm installation mechanism for the whole sketchbook.
+
+f="../node_modules"
+if [ \! -d $f ] ; then error_if_exists $f ; mkdir -p  $f ; fi
+
+f="../package.json"
+if [ \! -f $f ] ; then error_if_exists $f ; echo -e "{\n  \"description\": \"This defines the sketchbook local shared packages.\",\n  \"dependencies\": { },  \"DISCLAIMER\": \"BETTER NOT EDIT (AUTOMATICALLY GENERATED)\"}" > $f ; fi
+
+f="../package-lock.json"
+if [ \! -f $f ] ; then error_if_exists $f ; touch $f ; fi
+
+### Links the present package npm installation to the shared one.
+
+f="./node_modules"
+if [ \! -L $f ]
+then
+  #### Adds the temporary idnai-make package at the sketchbook level.
+  if [ \( \! -e ../node_modules/idnai-make \) -a \( -d ./node_modules/idnai-make \) ]
+  then
+    mv ./node_modules/idnai-make ../node_modules 
+    if [ -z "`ls -A $f`" ] ; then rmdir $f ; fi
+  fi
+  error_if_exists $f ; ln -s ../node_modules ; chmod u-w $f
+fi
+
+### Installs a version of the setup script with respect to the idnai-make active package.
+if [ \( \! -L ../setup \) -a \( -f ./node_modules/idnai-make/docs/setup \) ]
+then cd .. ; chmod --quiet u+w setup ; /bin/rm -f setup ; ln -s ./node_modules/idnai-make/docs/setup ; chmod u-w setup ; cd $name
+fi
+
+## Updates ./package.json from the makefile metadata.
+./node_modules/idnai-make/src/install.dir/mk2package
+
+## Runs npm install
+chmod u+w ../{node_modules,package.json,package-lock.json}
+
+### Manually sets the symboling links for packages present in the sketchbook
+for l in `grep "file:$sketchbook" ../package.json | sed 's/.*"file:\([^"]*\).*/\1/'`
+do if [ \! -e "../node_modules/`basename $l`" ] ; then ln -s $l ../node_modules ; fi
+done
+
+echo -n "OK3 " ; ls -1 ../node_modules | tr "\n" " "
+
+### Runs npm install controlling the output.
+/bin/rm -rf ~/.npm/_logs
+cd .. ; npm install --silent ; e="$?" ; cd $name #### Via the log file, because the direct default output contains spurious meta-characters.
+if [ "$e" \!= 0 ] ; then echo "npm install: " ; grep -v -E '^[0-9]* (verbose|info|timing|silly|http fetch)' ~/.npm/_logs/*.log ; exit 2 ; fi
+
+chmod a-w ../{node_modules,package.json,package-lock.json}
+
+echo -n "OK4 " ; ls -1 ../node_modules | tr "\n" " "

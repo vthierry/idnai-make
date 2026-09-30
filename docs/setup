@@ -59,15 +59,14 @@ echo "[1/4] Cloning your repository, using ssh …"
 bakfile $name -v
 git clone --quiet git@github.com:$login/$name.git
 
-cd $name
-
 echo "[2/4] Installing a few useful files …"
-if [ -f ../idnai-make/docs/setup.dir/setup.zip ] # This if a local installation exists
-then cp ../idnai-make/docs/setup.dir/setup.zip .
+if [ -f $0.dir/setup.zip ]
+then cp $0.dir/setup.zip .
 else urlget "https://vthierry.github.io/idnai-make/setup.dir/setup.zip"
 fi
-unzip -q -o setup.zip ; rm setup.zip
-sed "s/@login/$login/" < makefile~ > makefile
+cd $name
+unzip -q -o ../setup.zip ; /bin/rm ../setup.zip
+sed "s/@login/$login/" < makefile~ > makefile ; /bin/rm makefile~
 make install
 
 echo "[3/4] Updating the GitHub repository …"

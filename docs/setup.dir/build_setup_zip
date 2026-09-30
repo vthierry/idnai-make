@@ -31,7 +31,7 @@ define package #=> This defines the GitHub package metadata in json5 syntax (see
 #  contributors: [ #=> The contributors name (real name, no pseudo), mail and/or url (one mandatory by contract for contact), plus role.
 #    { name: "J. Doe" mail: someone@somewhere.com url: https://github.com/\$login role: developer }
 #  ]
-#  os: [ Linux, armv7l, esp32, Darwin, mingw64 ] # An optional list of targeted operating-systems.
+#  os: [ linux, armv7l, esp32, darwin, mingw64 ] # An optional list of targeted operating-systems.
   dependencies: [ idnai-make ] # The packages required to run this one, if not present 'idnai-make' is added.
 }
 endef

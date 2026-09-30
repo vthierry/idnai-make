@@ -8,9 +8,13 @@ Usage: urlexists $url
   process.exit();
 }
 
-fetch(process.argv[2], { method: "HEAD" }).then((response) => {
-  if (!response.ok)
-    console.log(response.status);
-});
+try {
+  fetch(process.argv[2], { method: "HEAD", signal: AbortSignal.timeout(5000) }).then((response) => {
+    if (!response.ok)
+      console.log(response.status);
+  });
+} catch(error) {
+  console.log(error);
+}
 
 

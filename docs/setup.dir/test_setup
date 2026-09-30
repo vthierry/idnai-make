@@ -5,40 +5,32 @@
 ## Cd in the sketchbook
 cd `dirname $0`/../../../
 
-## If true works in a sketchbook/sketchbook_sandox 
-sandbox=true
-
 ## Cleans previous local repository files
 sudo /bin/rm -rf sketchbook_sandox
-if ! $sandbox
-then
-  for f in ./{node_modules,package.json,package-lock.json} idnai-test*
-  do sudo /bin/rm -rf $f
-  done
-fi
 ## Rebuilds the file bundle
 make -C idnai-make -B docs/setup.dir/setup.zip
 
-## Cleans idnia-test remote files
-  git clone --quiet git@github.com:vthierry/idnai-test.git
-  cd idnai-test
-  for f in .gitignore bin docs LICENSE makefile* node_modules package* README.md src
-  do (chmod u+w $f ; git rm --quiet -rf $f ; /bin/rm -rf $f) 2>/dev/null
-  done
-  git commit --quiet -a -m 'Test repository reset' 2>/dev/null
-  git push --quiet
-  cd ..
-  /bin/rm -rf idnai-test
+## Works in a sandbox directory
+mkdir sketchbook_sandox ; cd sketchbook_sandox
 
-## Works in a sandbox if reequired
-if $sandox
-then setup="../idnai-make/docs/setup" ; mkdir sketchbook_sandox ; cd sketchbook_sandox
-else setup="./idnai-make/docs/setup" 
-fi
+## Cleans idnia-test remote files
+git clone --quiet git@github.com:vthierry/idnai-test.git
+cd idnai-test
+for f in .gitignore bin docs LICENSE makefile* node_modules package* src
+do (chmod --quiet u+w $f ; git rm --quiet -rf $f ; /bin/rm -rf $f) 2>/dev/null
+done
+echo "# This is only a test directory, better not use" > README.md
+git add README.md
+git commit --quiet -a -m 'Repository reset' 2>/dev/null
+git push --quiet
+echo -n "OK1 " ; ls 
+cd ..
+/bin/rm -rf idnai-test
 
 ## Runs the setup
-echo -e "yyvthierry\nidnai-test\n" | $setup
+echo -e "yyvthierry\nidnai-test\n" | $setup ../idnai-make/docs/setup
 cd idnai-test
+echo -n "OK2 " ; ls -1 | tr "\n" " "
 #make install=idnai-json
 #make install=idnai-sys
 

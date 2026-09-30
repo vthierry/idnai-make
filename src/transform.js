@@ -10,10 +10,10 @@ const fs = require("fs");
  * - The output file is backup using a `~` suffix, before being written.
  */
 function transform(transform, argv) {
-  let error = function(message) {
+  const error = function(message) {
     throw new Error(message);
   };
-  let bakfile = function(file) {
+  const bakfile = function(file) {
     if (fs.existsSync(file)) {
       bakfile(file + "~");
       fs.renameSync(file, file + "~");
