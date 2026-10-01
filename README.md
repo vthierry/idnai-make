@@ -4,12 +4,12 @@
 
 - keywords: [raspberry,esp32,web-service,weak-json]
 - homepage: [https://vthierry.github.io/idnai-make](https://vthierry.github.io/idnai-make) for documentation
-- version: 0.0.1 at 2026-09-30T14:05
+- version: 0.0.1 at 2026-10-01T13:58
 - license: [CeCILL-C](https://en.wikipedia.org/wiki/CeCILL) for source-code, [CC-BY](https://creativecommons.org/licenses/by/4.0/legalcode) for documents,multimedia
 - contributors: ([https://github.com/vthierry](https://github.com/vthierry)) is a developer
 - repository: { type: git url: "https://github.com/vthierry/idnai-make" }
 - issues: [on this link](https://github.com/vthierry/idnai-make/issues)
-- available-os: [null,null,null,null]
+- available-os: ["linux","armv7l","esp32","mingw64"]
 - dependencies: jsdoc,docdash,js-beautify,markdown-it,markdown-it-table-of-contents,markdown-it-anchor
 
 ## Package installation:

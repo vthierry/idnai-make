@@ -14,7 +14,7 @@
       "role": "developer"
     }
   ],
-  "os":  [null,null,null,null],
+  "os":  ["linux","armv7l","esp32","mingw64"],
   "dependencies": {
     "jsdoc": "latest",
     "docdash": "latest",
@@ -22,7 +22,7 @@
     "markdown-it": "latest",
     "markdown-it-table-of-contents": "latest",
     "markdown-it-anchor": "latest",
-    "idnai-make": "file:/home/vthierry/sketchbook/idnai-make"
+    "idnai-make": "file:/local/data/mnemosyne/aide/idnai-make"
   },
   "DISCLAIMER": "BETTER NOT EDIT (AUTOMATICALLY GENERATED)"
 }
