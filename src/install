@@ -30,6 +30,7 @@ then
   #### Adds the temporary idnai-make package at the sketchbook level.
   if [ \( \! -e ../node_modules/idnai-make \) -a \( -d ./node_modules/idnai-make \) ]
   then
+    temporary_idnai_make=true
     mv ./node_modules/idnai-make ../node_modules 
     if [ -z "`ls -A $f`" ] ; then rmdir $f ; fi
   fi
@@ -47,6 +48,9 @@ $0.dir/mk2package
 ## Runs npm install
 chmod u+w ../{node_modules,package.json,package-lock.json}
 
+### Removes the temporary idnai-make repository
+if [ \! -z "$temporary_idnai_make" ] ; then /bin/rm -rf ../node_modules/idnai-make ; fi
+
 ### Manually sets the symboling links for packages present in the sketchbook
 for l in `grep "file:$sketchbook" ../package.json | sed 's/.*"file:\([^"]*\).*/\1/'`
 do if [ \! -e "../node_modules/`basename $l`" ] ; then ln -s $l ../node_modules ; fi
@@ -55,8 +59,9 @@ done
 echo -n "OK3 " ; ls -1 ../node_modules | tr "\n" " "
 
 ### Runs npm install controlling the output.
+#### Note: The log file is used for output, because of spurious meta-characters on stdout.
 /bin/rm -rf ~/.npm/_logs
-cd .. ; cat package.json ; npm install --silent ; e="$?" ; cd $name #### Via the log file, because the direct default output contains spurious meta-characters.
+cd .. ; cat package.json ; npm install --silent ; e="$?" ; cd $name
 if [ "$e" \!= 0 ] ; then echo "npm install: " ; grep -v -E '^[0-9]* (verbose|info|timing|silly|http fetch)' ~/.npm/_logs/*.log ; exit 2 ; fi
 
 #@ chmod a-w ../{node_modules,package.json,package-lock.json}
