@@ -100,7 +100,7 @@ writeLockedFileSync = function(filename, text, git, lock) {
   input["dependencies"].push(input["name"]);
 }
 
-if (true) console.log("Processed input: " + JSON.stringify(input, null, 2));
+if (debug) console.log("Processed input: " + JSON.stringify(input, null, 2));
 
 // Manages dependencies
 
@@ -216,7 +216,8 @@ ${keywords}\
 ${os}\
   "dependencies": ${JSON.stringify(dependencies, null, 2).replace(new RegExp("\n", "gs"), "\n  ")},
   "DISCLAIMER": "BETTER NOT EDIT (AUTOMATICALLY GENERATED)"
-}`;
+}
+`;
   writeLockedFileSync("package.json", npmpackage, false, true);
 }
 
