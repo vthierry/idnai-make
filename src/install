@@ -59,6 +59,6 @@ echo -n "OK3 " ; ls -1 ../node_modules | tr "\n" " "
 cd .. ; cat package.json ; npm install --silent ; e="$?" ; cd $name #### Via the log file, because the direct default output contains spurious meta-characters.
 if [ "$e" \!= 0 ] ; then echo "npm install: " ; grep -v -E '^[0-9]* (verbose|info|timing|silly|http fetch)' ~/.npm/_logs/*.log ; exit 2 ; fi
 
-chmod a-w ../{node_modules,package.json,package-lock.json}
+#@ chmod a-w ../{node_modules,package.json,package-lock.json}
 
 echo -n "OK4 " ; ls -1 ../node_modules | tr "\n" " "
