@@ -35,8 +35,10 @@ openurl() {
 
 confirm "This script will set up an idnai-* driven package, is it OK" "Bye."
 
+### This script is only usable in a sketchbook directory
 confirm "Are you in your sketchbook directory" "In that case:\n- Choose and/or create sketchbook directory, for instance, '~/sketchbook/'.\n- Move this 'setup' script in it.\n- Rerun this script.\nBye."
 
+### This script only applies to GitHub repository
 read -p "What is, please, your GitHub login: " -e login
 read -p "What is, please, the package name: " -e name
 
@@ -53,17 +55,14 @@ EOF
   exit 1
 fi
 
-echo OK99
-
+### This script requires nodejs
 if ! dpkg-query -Wf'${db:Status}' nodejs 2>/dev/null ; then sudo apt install nodejs ; fi
 
-echo OK98
+## Setup steps #########################################################################
 
 echo "[1/4] Cloning your repository, using ssh …"
 bakfile $name -v
 git clone --quiet git@github.com:$login/$name.git
-
-echo OK97
 
 echo "[2/4] Installing a few useful files …"
 if [ -f $0.dir/setup.zip ]
@@ -75,10 +74,8 @@ cd $name
 
 unzip -q -o ../setup.zip ; /bin/rm ../setup.zip
 sed "s/@login/$login/" < makefile~ > makefile ; /bin/rm makefile~
-echo OK96
-cat package.json
+
 make install
-echo OK95
 
 echo "[3/4] Updating the GitHub repository …"
 git add .gitignore makefile bin docs src
@@ -88,5 +85,5 @@ git push --quiet --force
 cd ..
 
 echo "[4/4] Next step: please, manually activate the web pages:"
-#openurl "\tIn the Pages settings" "https://github.com/$login/$name/settings/pages" 
-#openurl "\tUsing the related documentation" "https://vthierry.github.io/idnai-make/setup.dir/setup-6.pdf" 
+#@ openurl "\tIn the Pages settings" "https://github.com/$login/$name/settings/pages" 
+#@ openurl "\tUsing the related documentation" "https://vthierry.github.io/idnai-make/setup.dir/setup-6.pdf" 
