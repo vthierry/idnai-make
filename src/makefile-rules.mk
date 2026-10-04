@@ -90,7 +90,7 @@ docs/%.html: src/%.md
 
 ### Defines the API documentation and markdown file's rendering generation
 
-BUILD_API = beautify $(subst src/%.md,docs/%.html,$(wildcard src/*.md)) docs/index.html linkcheck
+BUILD_API = beautify $(subst src/%.md,docs/%.html,$(wildcard src/*.md)) $(BUILD_API_PY) docs/index.html linkcheck 
 
 ### - Building API documentation:
 ###   - Documentation is found in src/*.md, */*.js, */*.hpp, */*.mpl, and bin/* files.
@@ -140,27 +140,31 @@ endif
 	mkdir -p $(@D)
 	./node_modules/idnai-make/src/docdash2/bin2doc $^ > $@
 
-#### Runs jsdoc with linkcheck
-
-docs/index.html: README.md ./node_modules/docdash2 .~/mk.js .~/bin.js $(shell ls {docs,bin,src}/*.{hpp,js,mpl} 2>/dev/null)
-	jsdoc -c ./node_modules/docdash2/config.json -t ./node_modules/docdash2 -R README.md -d docs $(sort $(wildcard src/*js) $(wildcard docs/*js)) .~/mk.js .~/bin.js 
-
-linkcheck:
-	for l in `find docs -name '*.html' -exec grep 'href *=' {} \; | subst "[^\n]*href=['\"]([^'\"]*)['\"][^\n]*" "$$1" | sort -u` ;\
-	do if [ -z "`urlexists $$l`" ] ; then echo "Broken link: $$l" ; fi ;\
-	done
-
 #### Generates Python documentation if any
 
 ifneq (,$(wildcard src/*.py))
 
-PY_API = true
+BUILD_API_PY = docs/py/index.html
 
 docs/py/index.html: $(wildcard src/*.py)
 	mkdir -p $(@D)
 	pdoc --footer-text "`date +'%Y-%m-%d %H:%M:%S'` version"  $^ -o docs/py
 
 endif
+
+./.~/py.js : 
+	echo "/** @global\n * @class Python objects\n */"
+
+
+#### Runs jsdoc with linkcheck
+
+docs/index.html: README.md ./node_modules/docdash2 .~/mk.js .~/bin.js $(shell ls {docs,bin,src}/*.{hpp,js,mpl} 2>/dev/null)
+	jsdoc -c ./node_modules/docdash2/config.json -t ./node_modules/docdash2 -R README.md -d docs $(sort $(wildcard src/*js) $(wildcard docs/*js)) .~/mk.js .~/bin.js ./.~/py.js
+
+linkcheck:
+	for l in `find docs -name '*.html' -exec grep 'href *=' {} \; | subst "[^\n]*href=['\"]([^'\"]*)['\"][^\n]*" "$$1" | sort -u` ;\
+	do if [ -z "`urlexists $$l`" ] ; then echo "Broken link: $$l" ; fi ;\
+	done
 
 ### Defines maple processing for file generation.
 
