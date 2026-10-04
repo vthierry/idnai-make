@@ -68,7 +68,7 @@ endif
 ## - Hint: The INSTALL target's variable can be defined in makefile for package specific targets, taken into account after standard install.
 ## - Note: a link of the present package is created in node_modules for build homogeneity.
 
-README.md: makefile
+README.md: makefile $(wildcard src/%.md)
 	./node_modules/idnai-make/src/install.dir/mk2package
 
 ## Manages build rules
@@ -84,11 +84,6 @@ build: # [=[oar|ssh]:$host[/$path]] Builds targets defined by the makefile rules
 ##   - It uses the `rrun` remote execution scripts, see its usage for details.
 ##   - The $path is assumed to correspond to a git package installation of the same package on the remote host.
 ## - Hint: The BUILD target's variable can be defined in makefile for package specific targets, built after standard targets.
-
-### Properly renders the markdown files (with the @frame tag, if any).
-
-docs/%.html: src/%.md
-	subst "@frame\\s+([^\\s]+)" "<p><center><iframe style='width: 100%; height: calc(66vh);' src='$1'></iframe></center><a href='$$1' target='_blank'>&nbsp;&nbsp;(open in new tab)</a></p>" $^ | md2html > $@
 
 ### Defines the API documentation and markdown file's rendering generation
 
@@ -111,6 +106,11 @@ BUILD_API = beautify $(subst src/%.md,docs/%.html,$(wildcard src/*.md)) $(BUILD_
 ###     - The `@frame $file`: inserts a iframe displaying the given file.
 ###     - Script one-line usage format is "Usage: $command $arguments ; $description"
 ###     - Non JavaScript source file must have all documentation fields explicit, as exemplified [here](https://github.com/vthierry/idnai-json/blob/main/src/wjson.hpp).
+
+### Properly renders the markdown files (with the @frame tag, if any).
+
+docs/%.html: src/%.md
+	subst "@frame\\s+([^\\s]+)" "<p><center><iframe style='width: 100%; height: calc(66vh);' src='$1'></iframe></center><a href='$$1' target='_blank'>&nbsp;&nbsp;(open in new tab)</a></p>" $^ | md2html > $@
 
 #### Normalize the source file layout
 
