@@ -145,7 +145,7 @@ endif
 docs/index.html: README.md ./node_modules/docdash2 .~/mk.js .~/bin.js $(shell ls {docs,bin,src}/*.{hpp,js,mpl} 2>/dev/null)
 	mkdir -p docs/api
 	jsdoc -c ./node_modules/docdash2/config.json -t ./node_modules/docdash2 -R README.md -d docs/api $(sort $(wildcard */*.js)) $(shell ls .~/{mk,bin}.js 2>/dev/null)
-	echo "<script>document.location('api/index.html');</script>"
+	echo "<script>document.location('api/index.html');</script>" > $@
 
 linkcheck:
 	for l in `find docs -name '*.html' -exec grep 'href *=' {} \; | subst "[^\n]*href=['\"]([^'\"]*)['\"][^\n]*" "$$1" | sort -u` ;\
