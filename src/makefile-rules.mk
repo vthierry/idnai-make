@@ -248,7 +248,7 @@ endif
 CCP = $if($(which clang),clang,$if($(which g++),g++,$if($(which c++),c++,)))
 
 ifneq (,$(CPP))
-ifneq (,$(wildcard src/*.cpp) $(wildcard src/*.C)) 
+ifneq (,$(wildcard src/*.cpp)$(wildcard src/*.C)) 
 
 OS=$(shell uname -s) 
 
@@ -273,7 +273,7 @@ BUILD_CPP = $(patsubst %.mpl,%.mpl.out.txt,$(wildcard src/*.mpl)) $(patsubst %_h
 
 ./node_modules/.lib/libcpp.so : $(patsubst %.cpp,%.o,$(wildcard ./node_modules/*/src/*.cpp))
 	mkdir -p $(@D)
-	echo ojojojo '$(wildcard src/*.cpp) $(wildcard src/*.C)'
+	echo "ojojojo '$(wildcard src/*.cpp) $(wildcard src/*.C)'"
 	$(CPP) -o $@ -fPIC -shared $^
 
 CPP_LIBS = node_modules/libcpp.so -lstdc++ -lm $(shell find /usr/lib -name 'libpython3.*.so' | head -1)
