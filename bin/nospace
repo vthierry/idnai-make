@@ -3,7 +3,7 @@
 if [ -z "$1" -o "$1" = -h -o "$1" = --help ]
 then cat <<EOU
 Usage: nospace \$filename
-- Removes blanks and hiding-dot in file name.
+Removes blanks and hiding-dot in file name.
 EOU
 exit
 fi

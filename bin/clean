@@ -2,10 +2,9 @@
 
 if [ "$1" = -h -o "$1" = --help ]
 then cat <<EOU
-Usage: cleans [\$directory…]
-- Cleans all standard temporary files.
-  - The default directory is '.'.
-  
+Usage: clean [\$directory…]
+Cleans all standard temporary files.
+- The default directory is \`.\`.
 EOU
 exit
 fi

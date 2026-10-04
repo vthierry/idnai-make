@@ -5,10 +5,10 @@ const transform = require(process.argv[1]+"/../../src/transform.js");
 if (process.argv.length > 2 && ["-h", "--help"].includes(process.argv[2]) || ![4, 5, 6].includes(process.argv.length)) {
   console.log(`
 Usage: subst $pattern $replacement [$input [$output]]
-- Replaces a string using Javascript regular expressions.
-  - The newline is treated as a standard char.
-  - The default output and input are stdout and stdin respectively.
-  - The input and output can be the same file.
+Replaces a string using Javascript regular expressions.
+- The newline is treated as a standard char.
+- The default output and input are stdout and stdin respectively.
+- The input and output can be the same file.
 `);
   process.exit();
 }

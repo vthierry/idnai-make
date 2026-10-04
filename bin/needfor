@@ -4,7 +4,7 @@ export PATH="`dirname $0`:$PATH"
 if [ -z "$1" -o "$1" = -h -o "$1" = --help ]
 then cat <<EOU
 Usage: needfor \$package
-- Tests if a package is installed, and proposes to install otherwise, or exit with error.
+Tests if a package is installed, and proposes to install otherwise, or exit with error.
 EOU
 exit
 fi

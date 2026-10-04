@@ -3,7 +3,7 @@
 if (process.argv.length > 2 && ["-h", "--help"].includes(process.argv[2]) || process.argv.length != 3) {
   console.log(`
 Usage: urlexists $url
-- Returns an empty string if the URL is available, else the HTTP response status.
+Returns an empty string if the URL is available, else the HTTP response status.
 `);
   process.exit();
 }

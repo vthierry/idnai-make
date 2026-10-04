@@ -1,4 +1,12 @@
 # These are the idnai makefile rules
+# - General elements:
+#   - Please refer to the [make](https://www.gnu.org/software/make/manual/make.html) documentation.
+#   - Auto-documented makefile:
+#     - Target's construct of pattern `target: dependencies # [options] Description` yield the usage.
+#     - Lines of pattern '## - Complements' completes the usage in the documentation.
+#   - With [`make -d [option]`](https://www.gnu.org/software/make/manual/html_node/Options-Summary.html#index-_002dd)
+#     - Various debugging information are available.
+#     - If recompiled, the C/C++ `DEBUG` global variable is set.
 
 ## Configures the makefile with bash, in silent mode, avoiding spurious parallelism, and extending path.
 
@@ -6,7 +14,7 @@ export SHELL := /bin/bash
 
 THE_MAKEFILES = makefile $(wildcard ./node_modules/*/src/makefile-rules.mk)
 
-#.SILENT: $(shell cat $(THE_MAKEFILES) | sed -n 's/^\([^:]*\):.*/\1/p')
+.SILENT: $(shell cat $(THE_MAKEFILES) | sed -n 's/^\([^:]*\):.*/\1/p')
 
 .NOTPARALLEL:
 
@@ -29,15 +37,6 @@ default:
 	$(MAKE) $(if $(what),$(what),usage)
 
 ## Shows the makefile usage, extracting automatically the documentation.
-
-## - General elements:
-##   - Please refer to the [make](https://www.gnu.org/software/make/manual/make.html) documentation.
-##   - Auto-documented makefile:
-##     - Target's construct of pattern 'target: dependencies # [options] Description' yield the usage.
-##     - Lines of pattern '## - Complements' completes the usage in the documentation.
-##   - With [`make -d [option]`](https://www.gnu.org/software/make/manual/html_node/Options-Summary.html#index-_002dd)
-##     - Various debugging information are available.
-##     - If recompiled, the C/C++ `DEBUG` global variable is set.
 
 usage: # Shows this usage
 	echo -e 'Usage: make $$command [$$arguments]\n Available commands:'
@@ -91,7 +90,7 @@ docs/%.html: src/%.md
 
 ### Defines the API documentation and markdown file's rendering generation
 
-BUILD_API = beautify $(subst src/%.md,docs/%.html,$(wildcard *.md)) docs/index.html linkcheck
+BUILD_API = beautify $(subst src/%.md,docs/%.html,$(wildcard src/*.md)) docs/index.html linkcheck
 
 ### - Building API documentation:
 ###   - Documentation is found in src/*.md, */*.js, */*.hpp, */*.mpl, and bin/* files.
@@ -114,14 +113,15 @@ BUILD_API = beautify $(subst src/%.md,docs/%.html,$(wildcard *.md)) docs/index.h
 #### Normalize the source file layout
 
 beautify:
+	$(info beautify)
 ifneq (,$(shell which js-beautify))
-	for f in $(wildcard */*.js) ; do cp -p $$f $$f~ ; touch $$f~ -r $$f ; js-beautify -q -s 2 -n -r $$f ; touch $$f -r $$f~ ; done
+	for f in `ls {bin,docs,src}/*.js 2>/dev/null` ; do cp -p $$f $$f~ ; touch $$f~ -r $$f ; js-beautify -q -s 2 -n -r $$f ; touch $$f -r $$f~ ; done
 endif
 ifneq (,$(shell which css-beautify))
-	for f in $(wildcard */*.css) ; do cp -p $$f $$f~ ; touch $$f~ -r $$f ; css-beautify -q -s 2 -n -r $$f ; touch $$f -r $$f~ ; done
+	for f in `ls {bin,docs,src}/*.css 2>/dev/null` ; do cp -p $$f $$f~ ; touch $$f~ -r $$f ; css-beautify -q -s 2 -n -r $$f ; touch $$f -r $$f~ ; done
 endif
 ifneq (,$(shell which uncrustify))
-	for f in $(wildcard src/*.hpp) $(wildcard src/*.cpp) $(wildcard src/*.C) ; do cp -p $$f $$f~ ; touch $$f~ -r $$f ; uncrustify -q -c ./node_modules/idnai-make/src/uncrustify.cfg -f $$f~ -o $$f ; touch $$f -r $$f~ ; done ; fi
+	for f in `ls src/*.{hpp,cpp,C} 2>/dev/null` ; do cp -p $$f $$f~ ; touch $$f~ -r $$f ; uncrustify -q -c ./node_modules/idnai-make/src/uncrustify.cfg -f $$f~ -o $$f ; touch $$f -r $$f~ ; done ; fi
 endif
 
 #### Generates Python documentation if any
@@ -140,25 +140,25 @@ endif
 
 ./node_modules/docdash2:
 	mkdir -p $@
-	cp -rf ./node_modules/{docdash/{static,tmpl},idnai-make/src/docdash2/{config.json,publish.js,bin2doc,mk2doc}} $@
-	cp  ./docdash2/docdash2.js ./node_modules/jsdoc/plugins
+	cp -rf ./node_modules/{docdash/{static,tmpl},idnai-make/src/docdash2/{config.json,publish.js}} $@
+	cp ./node_modules/idnai-make/src/docdash2/docdash2.js ./node_modules/jsdoc/plugins
 
 #### Converts bin and make usage's documentations in jsdoc one.
 
 ./.~/mk.js: $(THE_MAKEFILES)
 	mkdir -p $(@D)
 	(echo -e "/** @class make\n@description Usage: make \$$command, available commands: */" ;\
-	 ./node_modules/docdash2/mk2doc $^) > $@
+	 ./node_modules/idnai-make/src/docdash2/mk2doc $^) > $@
 
 ./.~/bin.js : $(wildcard bin/[a-z0-9]*)
 	mkdir -p $(@D)
 	(echo -e "/** @class scripts\n@description Available scripts: */" ;\
-	 ./node_modules/docdash2/bin2doc $^) > $@
+	 ./node_modules/idnai-make/src/docdash2/bin2doc $^) > $@
 
 #### Runs jsdoc with linkcheck
 
-docs/index.html: README.md ./node_modules/docdash2 .~/mk.js .~/bin.js $(wildcard */*.hpp) $(wildcard */*.js) $(wildcard */*.sh) $(wildcard */*.mpl)
-	jsdoc -c ./node_modules/docdash2/config.json -t ./node_modules/docdash2 -R README.md -d docs $(sort $(wildcard */*.js)) $(wildcard .~/*.js)
+docs/index.html: README.md ./node_modules/docdash2 .~/mk.js ./.~/bin.js $(shell ls {docs,bin,src}/*.{hpp,js,mpl} 2>/dev/null)
+	jsdoc -c ./node_modules/docdash2/config.json -t ./node_modules/docdash2 -R README.md -d docs $(sort $(wildcard */*.js)) $(shell ls .~/{mk,bin}.js 2>/dev/null)
 
 linkcheck:
 	for l in `find docs -name '*.html' -exec grep 'href *=' {} \; | subst "[^\n]*href=['\"]([^'\"]*)['\"][^\n]*" "$$1" | sort -u` ;\
@@ -198,7 +198,7 @@ endif
 ###   - Drawings built with [libreoffice](https://fr.libreoffice.org) `tex/*.odg are processed as `tex/*.png`.
 ###   - Drawings built with [maple](https://www.maplesoft.com) `*/*.mpl` files are also taken into account.
 
-LATEX_MAINS = $(foreach f,$(wildcard */*.tex),$(if $(shell head -1 $(f) | grep '\\documentclass'),$(f),))
+LATEX_MAINS = $(foreach f,$(shell ls {src,tex}/*.tex 2>/dev/null),$(if $(shell head -1 $(f) | grep '\\documentclass'),$(f),))
 BUILD_LATEX = $(patsubst %.odg,%.png,$(wildcard %/*.odg)) $(patsubst %.mpl,%.mpl.out.txt,$(wildcard %/*.mpl)) $(patsubst tex/%.tex,docs/%.pdf,$(patsubst src/%.tex,tex/%.tex,$(LATEX_MAINS)))
 
 ### Applies pdflatex with the proper options and cleans all temporary unused files.
@@ -239,16 +239,17 @@ endif
 ###     - A maximal number of warning, debug information, and optimisation is performed.
 ###     - Actually the `-std=c++17` C++ standard is in use.
 ###   - On output:
-###     - All compiled objects are in `./node_modules/libcpp.so`.
+###     - All compiled objects are in `./node_modules/.lib/libcpp.so`.
 ###     - All executable program are in `./node_modules/.bin/%` files.
 ###   - Hints:
 ###     - With `make -d …` the DEBUG global variable is set.
 ###     - Undefined symbols defined in a .hpp fils but not implemented in a .cpp file appears using
-###       - `nm -C --demangle --undefined-only ./node_modules/libcpp.so | grep $name`
+###       - `nm -C --demangle --undefined-only ./node_modules/.lib/libcpp.so | grep $name`
 
 CCP = $if($(which clang),clang,$if($(which g++),g++,$if($(which c++),c++,)))
 
 ifneq (,$(CPP))
+ifneq (,$(wildcard src/*.cpp) $(wildcard src/*.C)) 
 
 OS=$(shell uname -s) 
 
@@ -259,7 +260,7 @@ ifeq (-d,$(findstring -d,$(MAKEFLAGS)))
 CPP_FLAGS += -D DEBUG
 endif
 
-BUILD_CPP = $(patsubst %.mpl,%.mpl.out.txt,$(wildcard src/*.mpl)) $(patsubst %_hpp.html,%.hpp,$(wildcard src/*_hpp.html)) ./node_modules/libcpp.so $(patsubst src/%.C,./node_modules/.bin/%,$(wildcard src/*.C)) 
+BUILD_CPP = $(patsubst %.mpl,%.mpl.out.txt,$(wildcard src/*.mpl)) $(patsubst %_hpp.html,%.hpp,$(wildcard src/*_hpp.html)) ./node_modules/.lib/libcpp.so $(patsubst src/%.C,./node_modules/.bin/%,$(wildcard src/*.C)) 
 
 #### Automatic headers generation
 
@@ -271,7 +272,9 @@ BUILD_CPP = $(patsubst %.mpl,%.mpl.out.txt,$(wildcard src/*.mpl)) $(patsubst %_h
 %.o: %.cpp
 	$(CPP) -c $(CPP_FLAGS) $^
 
-./node_modules/libcpp.so : $(patsubst %.cpp,%.o,$(wildcard ./node_modules/*/src/*.cpp))
+./node_modules/.lib/libcpp.so : $(patsubst %.cpp,%.o,$(wildcard ./node_modules/*/src/*.cpp))
+	mkdir -p $(@D)
+	echo ojojojo '$(wildcard src/*.cpp) $(wildcard src/*.C)'
 	$(CPP) -o $@ -fPIC -shared $^
 
 CPP_LIBS = node_modules/libcpp.so -lstdc++ -lm $(shell find /usr/lib -name 'libpython3.*.so' | head -1)
@@ -282,6 +285,7 @@ endif
 ./node_modules/.bin/%: src/%.C
 	$(CPP) -o $@ $(CPP_FLAGS) $^ $(CPP_LIBS)
 
+endif
 endif
 
 ## Tests mechanisms 

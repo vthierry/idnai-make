@@ -5,8 +5,8 @@ const transform = require(process.argv[1]+"/../../src/transform.js");
 if (process.argv.length > 2 && ["-h", "--help"].includes(process.argv[2]) || ![2, 3, 4].includes(process.argv.length)) {
   console.log(`
 Usage: md2html [$markdown-input [$html-output]]
-- Renders a markdown input in HTML.
-  - The default output and input are stdout and stdin respectively.
+Renders a markdown input in HTML.
+- The default output and input are stdout and stdin respectively.
 `);
   process.exit();
 }

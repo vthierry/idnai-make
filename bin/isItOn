@@ -5,22 +5,22 @@ needfor arp-scan
 usage() {
   cat <<EOU
 Usage: isItOn [[\$what=\$mac|\$what|\$mac] [[-b [\$port]] | -c \$what] | -e]
-- Outputs the IP address of a device if it is on the network, else nothing.
+Outputs the IP address of a device if it is on the network, else nothing.
+- Returns true or false accordingly.
+- Parameters:
   - mac: A MAC address, with a proper syntax.
      - The form '\$what=\$mac' registers a MAC address under a short-name, for subsequent calls.
   - what: A short-name associated to a registered MAC address.
 - Options:
-  - -b: Opens the http://\$IP[:\$port] home-page in the default \$BROWSER, if defined, for the \$IP address, if defined, on either the given or the default port.
+  - -b: Opens the \`http://\$IP[:\$port]\` home-page in the default \`\$BROWSER\`, if defined, for the \`\$IP\` address, if defined, on either the given or the default port.
   - -c: Checks if the '\$what' is registered, output the related MAC address if yes, and true or false accordingly, without network scan.
   - -e: Edits, with the default \$EDITOR, the '.isItOn' file with '\$what=\$mac' definitions, and exit.
 - Examples:
-  - The construct 'if isItOn \$what > /dev/null ; then …` detects if the device is on the network or not.
-    - The script returns true or false accordingly.
-  - The construct 'if [ -z "\`isItOn \$what ; then …` detects if the device is on the network or not.
+  - The construct \`if isItOn \$what > /dev/null ; then …\` detects if the device is on the network or not.
 - Notes:
-  - If the \$EDITOR or \$BROWSER environment variable is not set, the related option is silently discarded.
+  - If the \`\$EDITOR\` or \`\$BROWSER\` environment variable is not set, the related option is silently discarded.
   - The MAC expected address syntax is 'xx:xx:xx:xx:xx:xx' where 'x' stands for an hexadecimal digit.
-  - If '\$what' is an unknown short-name, stderr gets an error message, stdout remains empty, and it exists without error.
+  - If \`\$what\` is an unknown short-name, stderr gets an error message, stdout remains empty, and it exists without error.
 EOU
 }
 

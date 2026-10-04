@@ -3,7 +3,8 @@
 if [ -z "$1" -o "$1" = -h -o "$1" = --help ]
 then cat <<EOU
 Usage: bakfile [\$file] [-v]
-- Bakfiles a file if it exists, appending a '~' suffix.
+Bakfiles a file if it exists, appending a \`~\` suffix.
+- Option:
   - -v: Output a message if the file exists and is renamed.
 EOU
 exit

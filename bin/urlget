@@ -8,9 +8,10 @@ const { inspect } = require('node:util');
 if (process.argv.length > 2 && ["-h", "--help"].includes(process.argv[2]) || ![3, 4].includes(process.argv.length)) {
   console.log(`
 Usage: urlget $url [$file|-]
-- Saves the URL unique page, if available, in a file.
-  - The output file default name is given by the URL basename.
-- The URL page is output on stdout, if using '-' as second argument.
+Saves the URL page, if available, in a file.
+- Its saves only one web page.
+- The output file default name is given by the URL basename.
+- The URL page is output on stdout, if using \`-\` as second argument.
 `);
   process.exit();
 }

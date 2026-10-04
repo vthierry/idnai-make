@@ -3,9 +3,9 @@
 if [ -z "$1" -o "$1" = -h -o "$1" = --help ]
 then cat <<EOU
 Usage: confirm \$message [\$exit_message]
-- Asks a true/false question
-  - Returns the boolean answer if no exit message.
-  - Exits with error 1 if false and \$exit_message is set.
+Asks a true/false question
+- Returns the boolean answer if no exit message.
+- Exits with error 1 if false and \$exit_message is set.
 EOU
 exit
 fi

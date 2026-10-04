@@ -2,18 +2,18 @@
 export PATH="`dirname $0`:$PATH"
 
 usage() {
- cat <<EOF
+ cat <<EOU
 Usage: findsubst [-dir \$directory] [-name '\$pattern'] [-in '\$in' [-out '\$out']]
-- Multiple file replacement.
+Multiple file replacement.
 - Find:
-   - In the given directory (default is '.') and its sub-directories.
-   - Files matching the -name pattern (default is '*'), and
-     - containing the '\$in' regular expression, if specified.
-   - Regular expressions are those defined in JavaScript.
+  - In the given directory (default is '.') and its sub-directories.
+  - Files matching the -name pattern (default is '*'), and
+    - containing the \`\$in\` regular expression, if specified.
+  - Regular expressions are those defined in JavaScript.
 - Then:
-   - Replaces by the -out regular expression target, if specified.
-   - Files are backup using the '~' suffix before being changed.
-EOF
+  - Replaces by the -out regular expression target, if specified.
+  - Files are backup using the \`~\` suffix before being changed.
+EOU
 }
 
 dir="."; name="*"

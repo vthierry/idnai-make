@@ -6,32 +6,38 @@
 cd `dirname $0`/../../../
 
 ## Cleans previous local repository files
-sudo /bin/rm -rf sketchbook_sandox
+#@ sudo /bin/rm -rf sketchbook_sandox
 ## Rebuilds the file bundle
-make -C idnai-make -B docs/setup.dir/setup.zip
-cd idnai-make ; bin/git_sync ; cd ..
+#@ make -C idnai-make -B docs/setup.dir/setup.zip
+#@ cd idnai-make ; bin/git_sync ; cd ..
 
 ## Works in a sandbox directory
-mkdir sketchbook_sandox ; cd sketchbook_sandox
+mkdir -p sketchbook_sandox ; cd sketchbook_sandox
+
+## Forces reinstallation of build files
+rm -rf ./node_modules/docdash2 ./node_modules/.lib/*.o ; rsync --archive ../idnai-make/* ./node_modules/idnai-make
 
 ## Cleans idnia-test remote files
-git clone --quiet git@github.com:vthierry/idnai-test.git
-cd idnai-test
-for f in .gitignore bin docs LICENSE makefile* node_modules package* src
-do (chmod --quiet u+w $f ; git rm --quiet -rf $f ; /bin/rm -rf $f) 2>/dev/null
-done
-echo "# This is only a test directory, better not use" > README.md
-git add README.md
-git commit --quiet -a -m 'Repository reset' 2>/dev/null
-git push --quiet
-echo -n "OK1 " ; ls 
-cd ..
-/bin/rm -rf idnai-test
+if false ; then 
+  git clone --quiet git@github.com:vthierry/idnai-test.git
+  cd idnai-test
+  for f in .gitignore bin docs LICENSE makefile* node_modules package* src
+  do (chmod --quiet u+w $f ; git rm --quiet -rf $f ; /bin/rm -rf $f) 2>/dev/null
+  done
+  echo "# This is only a test directory, better not use" > README.md
+  git add README.md
+  git commit --quiet -a -m 'Repository reset' 2>/dev/null
+  git push --quiet
+  cd ..
+  /bin/rm -rf idnai-test
+fi
 
 ## Runs the setup
-echo -e "yyvthierry\nidnai-test\n" | $setup ../idnai-make/docs/setup
+#@echo -e "yyvthierry\nidnai-test\n" | $setup ../idnai-make/docs/setup
 cd idnai-test
-echo -n "OK2 " ; ls -1 | tr "\n" " "
+make install
+make build
+
 #make install=idnai-json
 #make install=idnai-sys
 
