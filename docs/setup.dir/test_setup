@@ -5,6 +5,8 @@
 ## Cd in the sketchbook
 cd `dirname $0`/../../../
 
+pwd
+
 ## Cleans previous local repository files
 sudo /bin/rm -rf sketchbook_sandox
 ## Rebuilds the file bundle
