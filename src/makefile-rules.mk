@@ -161,7 +161,7 @@ docs/index.html: README.md ./node_modules/docdash2 .~/mk.js .~/bin.js $(shell ls
 
 linkcheck:
 	for l in `cat docs/*.html | tr ">" "\n" | tr "<" "\n" | grep -E '(href|src) *= *.http' | sed 's/.*http/http/' | sed "s/[\"'].*//"` ;\
-	do echo "$$l" ; if [ \! -z "`urlexists $$l`" ] ; then echo "Broken link: $$l" ; fi ;\
+	do if [ \! -z "`urlexists $$l`" ] ; then echo "Broken link: $$l" ; fi ;\
 	done
 
 ### Defines maple processing for file generation.
