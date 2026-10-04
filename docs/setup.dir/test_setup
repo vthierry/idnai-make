@@ -32,8 +32,8 @@ fi
 ## Runs the setup
 echo -e "yyvthierry\nidnai-test\n" | $setup ../idnai-make/docs/setup
 cd idnai-test
-make install
 echo "Eh oh [du bateau](http://bas-tot)" > src/introduction.md
+make install
 make build
 
 #make install=idnai-json
