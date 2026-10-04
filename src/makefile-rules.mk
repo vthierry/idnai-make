@@ -160,7 +160,7 @@ docs/index.html: README.md ./node_modules/docdash2 .~/mk.js .~/bin.js $(shell ls
 	jsdoc -c ./node_modules/docdash2/config.json -t ./node_modules/docdash2 -R README.md -d docs $(sort $(wildcard src/*js) $(wildcard docs/*js)) .~/mk.js .~/bin.js
 
 linkcheck:
-	for l in `cat docs/*.html | tr ">" "\n" | tr "<" "\n" | grep -E '(href|src) *= *.http' | ../../idnai-make/bin/subst "[^\n]*href=['\"]([^'\"]*)['\"][^\n]*" "$$1"`
+	for l in `cat docs/*.html | tr ">" "\n" | tr "<" "\n" | grep -E '(href|src) *= *.http' | ../../idnai-make/bin/subst "[^\n]*href=['\"]([^'\"]*)['\"][^\n]*" "$$1"` ;\
 	do echo "$l" ; if [ -z "`urlexists $$l`" ] ; then echo "Broken link: $$l" ; fi ;\
 	done
 
