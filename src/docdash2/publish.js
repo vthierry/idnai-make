@@ -38,6 +38,12 @@ const improvePage = function(file, text) {
   {
     text = text.replace(new RegExp("<a href=\"global.html\">([^<]*)</a>", "g"), "<a href=\"global.html#$1\">$1</a>");
   }
+  // Adds a link towards Python doc if any
+  {
+    if (fs.existsSync("docs/py/index.html")) {
+      text =text.replace("<h2><a href=\"index.html\">Home</a></h2>", "<h2><a href=\"index.html\">Home</a></h2><h2><a href=\"py/index.html\">Python code</a></h2>");
+    }
+  }
   // Highlights inner classes in page
   {
     text = text.replace(new RegExp("(<dt)(><a)( href=\"[a-zA-Z][a-z]*-)", "g"), "$1 style=\"background: #6d426d; box-shadow: 0 .25em .5em #d3d3d3; border-top: 1px solid #d3d3d3; border-bottom: 1px solid #d3d3d3; margin: 1.5em 0 0.5em; padding: .75em 0 .75em 10px;\"$2 style=\"color: #eee; font-size: larger; font-weight: bold;\"$3");
