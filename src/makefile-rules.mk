@@ -149,16 +149,17 @@ BUILD_API_PY = docs/py/index.html
 docs/py/index.html: $(wildcard src/*.py)
 	mkdir -p $(@D)
 	pdoc --footer-text "`date +'%Y-%m-%d %H:%M:%S'` version"  $^ -o docs/py
-
-endif
+else
 
 ./.~/py.js : 
 	echo "/** @global\n * @class Python objects\n */"
+endif
+
 
 
 #### Runs jsdoc with linkcheck
 
-docs/index.html: README.md ./node_modules/docdash2 .~/mk.js .~/bin.js $(shell ls {docs,bin,src}/*.{hpp,js,mpl} 2>/dev/null)
+docs/index.html: README.md ./node_modules/docdash2 .~/mk.js .~/bin.js ./.~/py.js $(shell ls {docs,bin,src}/*.{hpp,js,mpl} 2>/dev/null)
 	jsdoc -c ./node_modules/docdash2/config.json -t ./node_modules/docdash2 -R README.md -d docs $(sort $(wildcard src/*js) $(wildcard docs/*js)) .~/mk.js .~/bin.js ./.~/py.js
 
 linkcheck:

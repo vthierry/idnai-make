@@ -34,6 +34,7 @@ echo -e "yyvthierry\nidnai-test\n" | $setup ../idnai-make/docs/setup
 cd idnai-test
 make install
 make build
+echo built
 
 #make install=idnai-json
 #make install=idnai-sys
