@@ -12,7 +12,9 @@
 
 export SHELL := /bin/bash
 
-THE_MAKEFILES = makefile $(wildcard ./node_modules/*/src/makefile-rules.mk)
+empty :=
+space := $(empty) $(empty)
+THE_MAKEFILES = makefile $(subst $(space),:,$(wildcard ./node_modules/*/src/makefile-rules.mk))
 
 .SILENT: $(shell cat $(THE_MAKEFILES) | sed -n 's/^\([^:]*\):.*/\1/p')
 
