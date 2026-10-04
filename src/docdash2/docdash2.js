@@ -5,7 +5,7 @@ const path = require("path");
 
 exports.handlers = {
   beforeParse: function(e) {
-    //- console.log("documenting " + path.basename(e.filename));
+    console.log("documenting " + path.basename(e.filename));
     // Gets the file directory
     let dirname = path.dirname(e.filename);
     if (jsdoc2_done[dirname] == undefined) {
