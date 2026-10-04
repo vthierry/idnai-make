@@ -21,20 +21,23 @@ input2log = function(input) {
  */`);
 }
 
-process.argv.slice(2).forEach(file => {
-  let input = fs.readFileSync(file, "utf-8");
-  if(input.match(new RegExp("^#!/bin/bash.*", "gs"))) {
-    input2log(input.replace(new RegExp(".*<<\\s*EOU\\s*(Usage\\s*:.*)EOU.*", "gs"), "$1").replace(new RegExp("\\\\\\$", "gs"), "$"));
-  } else if(input.match(new RegExp("^#![^\n]*node.*", "gs"))) {
-    input2log(input.replace(new RegExp(".*console\\.log\\(`\\s*(Usage\\s*:(\\`|[^`])*)`.*", "gs"), "$1"));
-  } else {
-    console.log(`
+if (process.argv.length > 2) {
+  console.log("/** @class scripts\n * @description Available scripts.\n */\n");
+  process.argv.slice(2).forEach(file => {
+    let input = fs.readFileSync(file, "utf-8");
+    if(input.match(new RegExp("^#!/bin/bash.*", "gs"))) {
+      input2log(input.replace(new RegExp(".*<<\\s*EOU\\s*(Usage\\s*:.*)EOU.*", "gs"), "$1").replace(new RegExp("\\\\\\$", "gs"), "$"));
+    } else if(input.match(new RegExp("^#![^\n]*node.*", "gs"))) {
+      input2log(input.replace(new RegExp(".*console\\.log\\(`\\s*(Usage\\s*:(\\`|[^`])*)`.*", "gs"), "$1"));
+    } else {
+      console.log(`
 /**
  * @function ${file}
  * @memberof scripts
 */`);
-  }
-});
+    }
+  });
+}
 
 			     
 

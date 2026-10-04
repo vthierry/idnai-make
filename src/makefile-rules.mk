@@ -113,7 +113,6 @@ BUILD_API = beautify $(subst src/%.md,docs/%.html,$(wildcard src/*.md)) docs/ind
 #### Normalize the source file layout
 
 beautify:
-	$(info beautify)
 ifneq (,$(shell which js-beautify))
 	for f in `ls {bin,docs,src}/*.js 2>/dev/null` ; do cp -p $$f $$f~ ; touch $$f~ -r $$f ; js-beautify -q -s 2 -n -r $$f ; touch $$f -r $$f~ ; done
 endif
@@ -146,14 +145,15 @@ endif
 #### Converts bin and make usage's documentations in jsdoc one.
 
 ./.~/mk.js: $(THE_MAKEFILES)
+	$(info beautify)
+	echo "$(THE_MAKEFILES)"
+	cat $(THE_MAKEFILES)
 	mkdir -p $(@D)
-	(echo -e "/** @class make\n@description Usage: make \$$command, available commands: */" ;\
-	 ./node_modules/idnai-make/src/docdash2/mk2doc $^) > $@
+	./node_modules/idnai-make/src/docdash2/mk2doc $^ > $@
 
 ./.~/bin.js : $(wildcard bin/[a-z0-9]*)
 	mkdir -p $(@D)
-	(echo -e "/** @class scripts\n@description Available scripts: */" ;\
-	 ./node_modules/idnai-make/src/docdash2/bin2doc $^) > $@
+	./node_modules/idnai-make/src/docdash2/bin2doc $^ > $@
 
 #### Runs jsdoc with linkcheck
 

@@ -6,10 +6,10 @@
 cd `dirname $0`/../../../
 
 ## Cleans previous local repository files
-#@ sudo /bin/rm -rf sketchbook_sandox
+sudo /bin/rm -rf sketchbook_sandox
 ## Rebuilds the file bundle
-#@ make -C idnai-make -B docs/setup.dir/setup.zip
-#@ cd idnai-make ; bin/git_sync ; cd ..
+make -C idnai-make -B docs/setup.dir/setup.zip
+cd idnai-make ; bin/git_sync ; cd ..
 
 ## Works in a sandbox directory
 mkdir -p sketchbook_sandox ; cd sketchbook_sandox

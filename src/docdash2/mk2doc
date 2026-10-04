@@ -4,12 +4,18 @@ const fs = require("fs");
 
 // Internal usage: mk2doc.js $makefile … ; Converts makefile autodocumentation to a proper jsdoc.
 
+let header = "/** @class make\n * @description Usage: `make \$$command, available commands.`\n*/\n";
+
 process.argv.slice(2).forEach(file => {
   fs.readFileSync(file, "utf-8").
     replace(new RegExp("\n([a-z_0-9]*)\\s*: *[^#\n]*#([^\n]*)", "gs"), "\n##-@@@@Usage: make $1$2").
     split("\n").filter(l => l.match("^##\\s*-")).join("\n").replace(new RegExp("\n##", "gs"), "\n").replace(new RegExp("^##-@@@@", "gs"), "").
     split("\n-@@@@").
     forEach(input => {
+      if (header != "") {
+	console.log(header);
+	header = "";
+      }
       let target = input.replace(new RegExp("^Usage: make ([^\\s]*).*", "gs"), "$1");
       let usage  = input.replace(new RegExp("^Usage: ([^A-Z]*).*", "gs"), "$1");
       let body   = input.replace(new RegExp("^Usage: [^A-Z]*", "gs"), "").replace(new RegExp("\n","gs"), "\n * ");

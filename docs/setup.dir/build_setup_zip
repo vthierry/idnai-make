@@ -16,9 +16,10 @@ mkdir -p {bin,docs,src,node_modules/idnai-make}
 
 ### Creates the default makefile
 cat > makefile~ <<EOF
+
 ## The package metadata
 
-define package #=> This defines the GitHub package metadata in json5 syntax (see Notes below).
+define package # This defines the GitHub package metadata in json5 syntax (see Notes below).
 {
   login: @login #=> The mandatory GitHub account login name responsible for the package
 #  logo: "docs/logo-file-name.jpg" #=> An optional logo thumbnail
@@ -36,34 +37,34 @@ define package #=> This defines the GitHub package metadata in json5 syntax (see
 }
 endef
 
-### Notes:
-###
-### - These metadata automatically generates the README.md and package.json files, given a GitHub \$login:
-###    - The \$name, \$description, \$homepage, \$repository, \$issues and GitHub \$contributor information (as "responsible") are generated:
-###      - name: Obtained from this directeory basename.
-###      - description: Obtained from GitHub https://github.com/\$login/\$name.
-###      - homepage: https://\$login.github.io/\$name #=> Documentation (presentation, user guide, …).
-###      - repository: { type: git url: https://github.com/\$login/\$name }
-###      - issues: { url: https://github.com/\$login/\$name/issues }
-###      - contributors: [ { name: "\$real-name" mail: \$the-mail url: https://github.com/\$login role: responsible } … Obtained from GitHub
-###    - Otherwise they must be manually specified.
-###
-### - Dependencies can be:
-###   - Specified by a \$dependency name when:
-###     - In this package sketchbook, i.e., in the parent directory of this package.
-###     - On the https://github.com/\$login/\$dependency personal repository.
-###     - On the public https://www.npmjs.com platform, considering always the latest version.
-###     - An 'idnai-*' name.
-###   - Specified by a Git URL, if elsewhere.
-###     - For instance a 'git+https://github.com/\$another-login/\$another-name' repository.
-###     - If on GitHub it can the abbreviated as '\$another-login/\$another-name'.
-###
-### - The operating-system list is useful to better specify the package target.
-###   - It uses `uname -s | tr '[:upper:]' '[:lower:]'`
-###     - (e.g., 'linux' for Linux, 'armv7l' for RaspberryPi, 'darwin' for MacOS Linux layer, 'mingw64' for windows linux layer).
-###
-### - When done, these installation comments and notes can be cleaned.
-###
+# Notes:
+#
+# - These metadata automatically generates the README.md and package.json files, given a GitHub \$login:
+#    - The \$name, \$description, \$homepage, \$repository, \$issues and GitHub \$contributor information (as "responsible") are generated:
+#      - name: Obtained from this directeory basename.
+#      - description: Obtained from GitHub https://github.com/\$login/\$name.
+#      - homepage: https://\$login.github.io/\$name #=> Documentation (presentation, user guide, …).
+#      - repository: { type: git url: https://github.com/\$login/\$name }
+#      - issues: { url: https://github.com/\$login/\$name/issues }
+#      - contributors: [ { name: "\$real-name" mail: \$the-mail url: https://github.com/\$login role: responsible } … Obtained from GitHub
+#    - Otherwise they must be manually specified.
+#
+# - Dependencies can be:
+#   - Specified by a \$dependency name when:
+#     - In this package sketchbook, i.e., in the parent directory of this package.
+#     - On the https://github.com/\$login/\$dependency personal repository.
+#     - On the public https://www.npmjs.com platform, considering always the latest version.
+#     - An 'idnai-*' name.
+#   - Specified by a Git URL, if elsewhere.
+#     - For instance a 'git+https://github.com/\$another-login/\$another-name' repository.
+#     - If on GitHub it can the abbreviated as '\$another-login/\$another-name'.
+#
+# - The operating-system list is useful to better specify the package target.
+#   - It uses `uname -s | tr '[:upper:]' '[:lower:]'`
+#     - (e.g., 'linux' for Linux, 'armv7l' for RaspberryPi, 'darwin' for MacOS Linux layer, 'mingw64' for windows linux layer).
+#
+# - When done, these installation comments and notes can be cleaned.
+#
 
 ## A notepad area to freely write local todo list, short-term shared issues, bug or caveat reports, and todo list in weak-markdown syntax..
 define notepad
@@ -93,10 +94,10 @@ EOF
 $sketchbook/idnai-make/bin/clean $sketchbook/idnai-make/{src,bin}
 cp -r $sketchbook/idnai-make/{src,bin} ./node_modules/idnai-make
 
-### Builds a zip archive for the setup script
+## Builds a zip archive for the setup script
 zip="$sketchbook/idnai-make/docs/setup.dir/setup.zip"
 /bin/rm -f $zip ; zip -9qr $zip * .* ; git add $zip
 
-### Cleans up the temporary directory
+## Cleans up the temporary directory
 cd .. ; /bin/rm -rf .~
 
