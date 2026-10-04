@@ -123,6 +123,35 @@ ifneq (,$(shell which uncrustify))
 	for f in `ls src/*.{hpp,cpp,C} 2>/dev/null` ; do cp -p $$f $$f~ ; touch $$f~ -r $$f ; uncrustify -q -c ./node_modules/idnai-make/src/uncrustify.cfg -f $$f~ -o $$f ; touch $$f -r $$f~ ; done ; fi
 endif
 
+#### Installs the docdash template variant.
+
+./node_modules/docdash2:
+	mkdir -p $@
+	cp -rf ./node_modules/{docdash/{static,tmpl},idnai-make/src/docdash2/{config.json,publish.js}} $@
+	cp ./node_modules/idnai-make/src/docdash2/docdash2.js ./node_modules/jsdoc/plugins
+
+#### Converts bin and make usage's documentations in jsdoc one.
+
+./.~/mk.js: $(THE_MAKEFILES)
+	mkdir -p $(@D)
+	./node_modules/idnai-make/src/docdash2/mk2doc $^ > $@
+
+./.~/bin.js : $(wildcard bin/[a-z0-9]*)
+	mkdir -p $(@D)
+	./node_modules/idnai-make/src/docdash2/bin2doc $^ > $@
+
+#### Runs jsdoc with linkcheck
+
+docs/index.html: README.md ./node_modules/docdash2 .~/mk.js .~/bin.js $(shell ls {docs,bin,src}/*.{hpp,js,mpl} 2>/dev/null)
+	mkdir -p docs/api
+	jsdoc -c ./node_modules/docdash2/config.json -t ./node_modules/docdash2 -R README.md -d docs/api $(sort $(wildcard */*.js)) $(shell ls .~/{mk,bin}.js 2>/dev/null)
+	echo "<script>document.location('api/index.html');</script>"
+
+linkcheck:
+	for l in `find docs -name '*.html' -exec grep 'href *=' {} \; | subst "[^\n]*href=['\"]([^'\"]*)['\"][^\n]*" "$$1" | sort -u` ;\
+	do if [ -z "`urlexists $$l`" ] ; then echo "Broken link: $$l" ; fi ;\
+	done
+
 #### Generates Python documentation if any
 
 ifneq (,$(wildcard src/*.py))
@@ -134,35 +163,6 @@ docs/py/index.html: $(wildcard src/*.py)
 	pdoc --footer-text "`date +'%Y-%m-%d %H:%M:%S'` version"  $^ -o docs/py
 
 endif
-
-#### Installs the docdash template variant.
-
-./node_modules/docdash2:
-	mkdir -p $@
-	cp -rf ./node_modules/{docdash/{static,tmpl},idnai-make/src/docdash2/{config.json,publish.js}} $@
-	cp ./node_modules/idnai-make/src/docdash2/docdash2.js ./node_modules/jsdoc/plugins
-
-#### Converts bin and make usage's documentations in jsdoc one.
-
-./.~/mk.js: $(THE_MAKEFILES)
-	$(info OHOHOBEAUTIFY)
-	echo "$(THE_MAKEFILES)"
-	mkdir -p $(@D)
-	./node_modules/idnai-make/src/docdash2/mk2doc $^ > $@
-
-./.~/bin.js : $(wildcard bin/[a-z0-9]*)
-	mkdir -p $(@D)
-	./node_modules/idnai-make/src/docdash2/bin2doc $^ > $@
-
-#### Runs jsdoc with linkcheck
-
-docs/index.html: README.md ./node_modules/docdash2 .~/mk.js ./.~/bin.js $(shell ls {docs,bin,src}/*.{hpp,js,mpl} 2>/dev/null)
-	jsdoc -c ./node_modules/docdash2/config.json -t ./node_modules/docdash2 -R README.md -d docs $(sort $(wildcard */*.js)) $(shell ls .~/{mk,bin}.js 2>/dev/null)
-
-linkcheck:
-	for l in `find docs -name '*.html' -exec grep 'href *=' {} \; | subst "[^\n]*href=['\"]([^'\"]*)['\"][^\n]*" "$$1" | sort -u` ;\
-	do if [ -z "`urlexists $$l`" ] ; then echo "Broken link: $$l" ; fi ;\
-	done
 
 ### Defines maple processing for file generation.
 
@@ -273,7 +273,6 @@ BUILD_CPP = $(patsubst %.mpl,%.mpl.out.txt,$(wildcard src/*.mpl)) $(patsubst %_h
 
 ./node_modules/.lib/libcpp.so : $(patsubst %.cpp,%.o,$(wildcard ./node_modules/*/src/*.cpp))
 	mkdir -p $(@D)
-	echo "ojojojo '$(wildcard src/*.cpp) $(wildcard src/*.C)'"
 	$(CPP) -o $@ -fPIC -shared $^
 
 CPP_LIBS = node_modules/libcpp.so -lstdc++ -lm $(shell find /usr/lib -name 'libpython3.*.so' | head -1)
