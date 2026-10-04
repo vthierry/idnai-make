@@ -152,7 +152,7 @@ docs/py/index.html: $(wildcard src/*.py)
 else
 
 ./.~/py.js : 
-	echo "/** @global\n * @class Python objects\n */"
+	echo "/** @global\n * @class Python objects\n */" > $@
 endif
 
 
@@ -163,7 +163,7 @@ docs/index.html: README.md ./node_modules/docdash2 .~/mk.js .~/bin.js ./.~/py.js
 	jsdoc -c ./node_modules/docdash2/config.json -t ./node_modules/docdash2 -R README.md -d docs $(sort $(wildcard src/*js) $(wildcard docs/*js)) .~/mk.js .~/bin.js ./.~/py.js
 
 linkcheck:
-	for l in `find docs -name '*.html' -exec grep 'href *=' {} \; | subst "[^\n]*href=['\"]([^'\"]*)['\"][^\n]*" "$$1" | sort -u` ;\
+	for l in `find docs -name '*.html' -exec echo {} \; | subst "[^\n]*href=['\"]([^'\"]*)['\"][^\n]*" "$$1" | sort -u` ;\
 	do if [ -z "`urlexists $$l`" ] ; then echo "Broken link: $$l" ; fi ;\
 	done
 
