@@ -3,14 +3,14 @@
 if (process.argv.length > 2 && ["-h", "--help"].includes(process.argv[2]) || process.argv.length != 3) {
   console.log(`
 Usage: urlexists $url
-Returns an empty string if the URL is available, else the HTTP response status.
+Returns an empty string if the URL is available, else the HTTP response status or the fetch error code.
 `);
   process.exit();
 }
 
-fetch(process.argv[2], { method: "HEAD", signal: AbortSignal.timeout(5000) }).then((response) => {
-  if (!response.ok)
-    console.log(response.status);
-}).catch(error => console.log(error));
-
-
+fetch(process.argv[2], { method: "HEAD", signal: AbortSignal.timeout(5000) }).
+  then(response => { if (response != undefined && !response.ok) console.log(response.status); }).
+  catch(error => { console.log((""+error.cause).
+    replace(new RegExp(".*INVALID_URL.*", "gs"), "Invalid URL").
+    replace(new RegExp(".*ENOTFOUND.*", "gs"), "Web site not found")); });
+    
