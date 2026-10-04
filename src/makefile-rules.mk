@@ -12,15 +12,15 @@
 
 export SHELL := /bin/bash
 
-empty :=
-space := $(empty) $(empty)
-THE_MAKEFILES = makefile $(subst $(space),:,$(wildcard ./node_modules/*/src/makefile-rules.mk))
+THE_MAKEFILES = makefile $(wildcard ./node_modules/*/src/makefile-rules.mk)
 
 .SILENT: $(shell cat $(THE_MAKEFILES) | sed -n 's/^\([^:]*\):.*/\1/p')
 
 .NOTPARALLEL:
 
-export PATH := ./node_modules/.bin:$(wildcard ./node_modules/*/bin):$(PATH)
+empty :=
+space := $(empty) $(empty)
+export PATH := ./node_modules/.bin:$(subst $(space),:,$(wildcard ./node_modules/*/bin)):$(PATH)
 
 export NAME := $(notdir $(shell pwd))
 
