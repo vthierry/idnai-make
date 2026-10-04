@@ -155,10 +155,10 @@ endif
 #### Runs jsdoc with linkcheck
 
 docs/index.html: README.md ./node_modules/docdash2 .~/mk.js .~/bin.js $(shell ls {docs,bin,src}/*.{hpp,js,mpl} 2>/dev/null)
-	mkdir -p docs/py ; echo "OK" > docs/py/index.html
 	jsdoc -c ./node_modules/docdash2/config.json -t ./node_modules/docdash2 -R README.md -d docs $(sort $(wildcard src/*js) $(wildcard docs/*js)) .~/mk.js .~/bin.js
 
 linkcheck:
+	echo $(PATH)
 	for l in `grep 'href *=' docs/*.html | subst "[^\n]*href=['\"]([^'\"]*)['\"][^\n]*" "$$1" | sort -u` ;\
 	do echo "$l" ; if [ -z "`urlexists $$l`" ] ; then echo "Broken link: $$l" ; fi ;\
 	done
