@@ -5,8 +5,6 @@
 ## Cd in the sketchbook
 cd `dirname $0`/../../../
 
-pwd
-
 ## Cleans previous local repository files
 sudo /bin/rm -rf sketchbook_sandox
 ## Rebuilds the file bundle
@@ -15,9 +13,6 @@ cd idnai-make ; bin/git_sync ; cd ..
 
 ## Works in a sandbox directory
 mkdir -p sketchbook_sandox ; cd sketchbook_sandox
-
-## Forces reinstallation of build files
-rm -rf ./node_modules/docdash2 ./node_modules/.lib/*.o ; rsync --archive ../idnai-make/* ./node_modules/idnai-make
 
 ## Cleans idnia-test remote files
 if false ; then 

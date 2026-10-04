@@ -145,9 +145,8 @@ endif
 #### Converts bin and make usage's documentations in jsdoc one.
 
 ./.~/mk.js: $(THE_MAKEFILES)
-	$(info beautify)
+	$(info OHOHOBEAUTIFY)
 	echo "$(THE_MAKEFILES)"
-	cat $(THE_MAKEFILES)
 	mkdir -p $(@D)
 	./node_modules/idnai-make/src/docdash2/mk2doc $^ > $@
 
