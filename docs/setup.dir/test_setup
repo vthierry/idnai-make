@@ -2,20 +2,23 @@
 
 # Private usage: test_setup ; Tests the setup and install mechanism installing the idnai-test package
 
-## Cd in the sketchbook
-cd `dirname $0`/../../../
+test_setup=false
 
-## Cleans previous local repository files
-sudo /bin/rm -rf sketchbook_sandox
-## Rebuilds the file bundle
-make -C idnai-make -B docs/setup.dir/setup.zip
-cd idnai-make ; bin/git_sync ; cd ..
+if $test_setup ; then 
 
-## Works in a sandbox directory
-mkdir -p sketchbook_sandox ; cd sketchbook_sandox
+  ## Cd in the sketchbook
+  cd `dirname $0`/../../../
 
-## Cleans idnia-test remote files
-if false ; then 
+  ## Cleans previous local repository files
+  sudo /bin/rm -rf sketchbook_sandox
+  ## Rebuilds the file bundle
+  make -C idnai-make -B docs/setup.dir/setup.zip
+  cd idnai-make ; bin/git_sync ; cd ..
+
+  ## Works in a sandbox directory
+  mkdir -p sketchbook_sandox ; cd sketchbook_sandox
+
+  ## Cleans idnia-test remote files
   git clone --quiet git@github.com:vthierry/idnai-test.git
   cd idnai-test
   for f in .gitignore bin docs LICENSE makefile* node_modules package* src
@@ -27,15 +30,25 @@ if false ; then
   git push --quiet
   cd ..
   /bin/rm -rf idnai-test
+
+  ## Runs the setup
+  echo -e "yyvthierry\nidnai-test\n" | $setup ../idnai-make/docs/setup
+else
+  if [ \! -e sketchbook_sandox/idnai-test ]
+  then 
+    mkdir -p sketchbook_sandox ; cd sketchbook_sandox
+    echo -e "yyvthierry\nidnai-test\n" | $setup ../idnai-make/docs/setup
+  else
+    cp idnai-make/src/makefile-rules.mk sketchbook_sandox/node_modules/idnai-make/src/
+    cp idnai-make/src/install sketchbook_sandox/node_modules/idnai-make/src/
+    cd sketchbook_sandox
+  fi
 fi
 
-## Runs the setup
-echo -e "yyvthierry\nidnai-test\n" | $setup ../idnai-make/docs/setup
 cd idnai-test
-echo "Eh oh [du bateau](http://bas-tot)" > src/introduction.md
 make install
 make build
-
-#make install=idnai-json
-#make install=idnai-sys
+make install=idnai-json
+make install=idnai-sys
+make build
 

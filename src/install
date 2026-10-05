@@ -56,6 +56,13 @@ for l in `grep "file:$sketchbook" ../package.json | sed 's/.*"file:\([^"]*\).*/\
 do if [ \! -e "../node_modules/`basename $l`" ] ; then ln -s $l ../node_modules ; fi
 done
 
+### Checks that the GitHub packages have a package.json
+has_spurious_package=false
+for l in `grep "https://github.com" ../package.json | sed 's/.*"\(https:[^"]*\).*/\1/'`
+do if [ \! -z "`urlexists $l/blob/main/package.json`" ] ; then echo "No package.json in the main branch of $l" ; has_spurious_package=true ; fi
+done
+if $has_spurious_package ; then echo "Correct such package reference and rerun" ; exit 1 ; fi
+
 ### Runs npm install controlling the output.
 #### Note: The log file is used for output, because of spurious meta-characters on stdout.
 /bin/rm -rf ~/.npm/_logs
