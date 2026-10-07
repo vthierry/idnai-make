@@ -48,10 +48,7 @@ usage: # Shows this usage
 
 install: # [=$package] Installs or updates, a given packages or all packages.
 #	Adds the dependency to the makefile and updates the package.json files
-	if [ \! -z "$(install)" ] ;\
-	then subst '(dependencies\s*:\s*\[)\s*([^\]]*)$(install)\s*([^\]]*)\]' '$$1$$2$$3]' makefile makefile ;\
-	     subst '(dependencies\s*:\s*\[)\s*([^\]]*)\]' '$$1 $(install)]' makefile makefile ; fi
-	grep dependencies makefile
+	if [ \! -z "$(install)" ] ; then ./src/install.dir/addinstall $(install) ; fi
 #	Runs the install script from where it exists
 ifneq (,$(wildcard ./node_modules/idnai-make/src/install))
 	./node_modules/idnai-make/src/install
