@@ -2,20 +2,17 @@
 
 if [ -z "$1" -o "$1" = -h -o "$1" = --help ]
 then cat <<EOU
-Usage: bakfile [\$file] [-v]
+Usage: bakfile [\$file] [-v] [-d]
 Bakfiles a file if it exists, appending a \`~\` suffix.
 - Option:
-  - -v: Output a message if the file exists and is renamed.
+  - -v: Outputs a message if the file exists and is renamed.
+  - -d: Creates silently a directory of the file name, after backup.
 EOU
 exit
 fi
 
-bakfile() {
-  if [ -e "$1" ] ; then
-    if [ "$2" = "-v" ] ; then echo "The file '$1' exists and is renamed appendig a '~' suffix." ; fi
+if [ -e "$1" ] ; then
+    if [ "$2" = "-v" ] ; then echo "The file '$1' exists and is renamed appendig a '~' suffix." ; shift ; fi
     bakfile "$1~" ; mv "$1" "$1~"
-  fi
-}
-
-bakfile $*
-
+    if [ "$2" = "-d" ] ; then mkdir -p "$1" ; fi
+fi

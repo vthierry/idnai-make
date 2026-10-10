@@ -31,7 +31,7 @@ t="`echo $url | subst 'https://docs.google.com/([^/]*)/.*' '\$1'`"
 if [ -z "$o" ] ; then o="$id" ; fi
 
 if [ "$t" = "file" ]
-then urlget "https://drive.usercontent.google.com/download?id=$id" "$0"
+then urlget "https://drive.usercontent.google.com/download?id=$id" "$o"
 else urlget "https://docs.google.com/$t/export?format=$f&id=$id" "$o.$f" 
 #then wget -nv -O "$o" --no-check-certificate "https://drive.usercontent.google.com/download?id=$id"
 #else wget -nv -O "$o.$f" --no-check-certificate "https://docs.google.com/$t/export?format=$f&id=$id"
