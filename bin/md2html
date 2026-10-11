@@ -8,7 +8,7 @@ md.use(require("markdown-it-anchor").default);
 md.use(require("markdown-it-table-of-contents"));
 
 if (process.argv.length >= 3 && "-h -H -help --help".include(process.argv[2])) {
-  console.log("Usage: md2html [$markdown-input [$markdown-output]]\n Renders a markdown input in html.");
+  console.log("Usage: md2html [$markdown-input [$markdown-output]] ; Renders a markdown input in html.");
   exit();
 }
 
