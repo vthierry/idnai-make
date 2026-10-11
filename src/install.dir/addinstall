@@ -1,0 +1,12 @@
+#!/usr/bin/env node
+
+// Internal usage: addinstall Adds a new package to the makefile metadata and normalizes spaces
+
+const fs = require("fs");
+
+fs.writeFileSync("makefile", (""+fs.readFileSync("makefile")).
+  replace(new RegExp(`(dependencies\s*:\s*\[)\s*([^\]]*)${process.argv[2]}\s*([^\]]*)\]`, "gs"), "$1$2$3").
+  replace(new RegExp(`(dependencies\s*:\s*\[)\s*([^\]]*)\]`, "gs"), "$1 ${process.argv[2]}]").
+  replace(new RegExp(`[ \t]+\n`, "gs"), "\n").
+  replace(new RegExp(`[ \t]+`, "gs"), " "));
+  

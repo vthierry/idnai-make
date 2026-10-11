@@ -1,7 +1,45 @@
 #!/bin/bash
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> e4d850903a6aa3e034a6ff724a8d47524d62533a
 # Usage: nospace $filename ; Removes blanks and hiding-dot in file name.
 
 f="`echo $* | sed 's/ /_/g' | sed 's/\/\./\//g'`"
 if [ "$*" \!= "$f" ] ; then mv "$*" "$f" ; fi
+<<<<<<< HEAD
+=======
+=======
+if [ -z "$1" -o "$1" = -h -o "$1" = --help ]
+then cat <<EOU
+Usage: nospace [-R] \$filename_or_directory
+Renames file name without blank or hiding-dot.
+  - Echoes the renamed file name.
+Option:
+  -R: Changes files and directories recursively.
+EOU
+exit
+fi
+
+if [ "$1" = -R ]
+then
+  shift
+  d="`nospace $*`"
+  if [ -d "$d" ]
+  then
+    pushd $d >/dev/null
+    ls -1 | sed 's/^/nospace -R /' > /tmp/nospace$$.txt
+    bash /tmp/nospace$$.txt
+    /bin/rm /tmp/nospace$$.txt
+    popd > /dev/null
+  fi
+else
+  f="`echo $* | sed 's/ /_/g' | sed 's/^\/\./\//g'`"
+  if [ "$*" \!= "$f" ] ; then mv "$*" "$f" ; fi
+  echo "$f"
+fi
+
+>>>>>>> fd2c3c97569b848b31df839804b749fed0f4c1eb
+>>>>>>> e4d850903a6aa3e034a6ff724a8d47524d62533a
 

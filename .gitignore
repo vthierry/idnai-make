@@ -1,7 +1,24 @@
+<<<<<<< HEAD
 *~
 /package.json
 /package-lock.json
 /node_modules
 wifi.h
 /IP.txt
+=======
+# Local files not commited on the git repository
+
+## Backup and temporary file and directory
+*~
+.*~
+
+## Third-party packages installation
+/package-lock.json
+/node_modules
+
+## Files with private data
+/src/wifi.h
+/bin/.isItOn
+
+>>>>>>> b7d7076020c51ea3663cba51c7187e5c083cb02c
 

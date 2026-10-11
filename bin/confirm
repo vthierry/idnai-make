@@ -1,6 +1,33 @@
 #!/bin/bash
 
+<<<<<<< HEAD
 # Usage: confirm $message [$exit_message] ; Asks a true/false question ; returns the boolean answer or exit with error if false and $exit_message is set.
 
 read -p "$1? (y/N) : " -n 1 -e rep ; if [ "$rep" = "y" ] ; then true ; else if [ \! -z "$exit_message" ] ; then echo "$exit_message" ; exit 1 ; fi ; false ; fi
+=======
+<<<<<<< HEAD
+# Usage: confirm $message [$exit_message] ; Asks a true/false question ; returns the boolean answer or exit with error if false and $exit_message is set.
+
+read -p "$1? (y/N) : " -n 1 -e rep ; if [ "$rep" = "y" ] ; then true ; else if [ \! -z "$exit_message" ] ; then echo "$exit_message" ; exit 1 ; fi ; false ; fi
+=======
+if [ -z "$1" -o "$1" = -h -o "$1" = --help ]
+then cat <<EOU
+Usage: confirm \$message [\$exit_message]
+Asks a true/false question
+- Returns the boolean answer if no exit message.
+- Exits with error 1 if false and \$exit_message is set.
+EOU
+exit
+fi
+
+confirm() {
+  read -p "$1? (y/N) : " -n 1 -e rep ; if [ "$rep" = "y" ] ; then true ; else if [ \! -z "$2" ] ; then echo -e "$2" ; exit 1 ; fi ; false ; fi
+}
+
+confirm "$1" "$2"
+
+
+
+>>>>>>> fd2c3c97569b848b31df839804b749fed0f4c1eb
+>>>>>>> e4d850903a6aa3e034a6ff724a8d47524d62533a
 

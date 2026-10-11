@@ -1,6 +1,23 @@
 #!/bin/bash
+<<<<<<< HEAD
 
 # Usage: needfor package ; Tests if a package is installed before used, and proposes to install otherwise, or stop.
+=======
+<<<<<<< HEAD
+
+# Usage: needfor package ; Tests if a package is installed before used, and proposes to install otherwise, or stop.
+=======
+export PATH="`dirname $0`:$PATH"
+
+if [ -z "$1" -o "$1" = -h -o "$1" = --help ]
+then cat <<EOU
+Usage: needfor \$package
+Tests if a package is installed, and proposes to install otherwise, or exit with error.
+EOU
+exit
+fi
+>>>>>>> fd2c3c97569b848b31df839804b749fed0f4c1eb
+>>>>>>> e4d850903a6aa3e034a6ff724a8d47524d62533a
 
 if ! dpkg-query -Wf'${db:Status}' "$1" 2>/dev/null ; then
   if confirm "The '$1' package is not installed ? Shall we" "It cannot be proceeded, bye." ; then sudo apt install "$1" ; fi
