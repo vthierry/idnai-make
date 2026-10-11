@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# Usage: needfor package ; Tests if a package is installed before used, and proposes to install otherwise, or stop.
+
+if ! dpkg-query -Wf'${db:Status}' "$1" 2>/dev/null ; then
+  if confirm "The '$1' package is not installed ? Shall we" "It cannot be proceeded, bye." ; then sudo apt install "$1" ; fi
+fi
