@@ -13,7 +13,7 @@ fi
 
 if [ -z "$*" ] ; then m="minor modification" ; else m="$*" ; fi
 
-"`dirname $0`"/clean
+#echo -n "Cleaning … " ; "`dirname $0`"/clean ; echo "done"
 
 git_sync_here() {
   git pull -q --allow-unrelated-histories;
@@ -21,8 +21,10 @@ git_sync_here() {
   git status -s
 }
 
+gits="`find -path '\./\.[a-zA-Z]*' -prune -o -type d`"
 
-gits="`find -name .git`"
+echo "$gits"
+exit
 
 if [ -z "$gits" ] ; then echo 'No git directory here'; exit 1 ; fi
 
