@@ -1,0 +1,37 @@
+#!/bin/bash
+
+if [ "$1" = -h -o "$1" = --help ]
+then cat <<EOU
+Usage: git_sync [\$commit_message]
+Synchronizes the Git remote repository with the current one.
+- The local repository is pulled, commited and pushed, in order to synchronize.
+- Paths with difference with respect to this commit are listed.
+- Sub-directories containing other git repositories are also synchronized too.
+EOU
+exit
+fi
+
+if [ -z "$*" ] ; then m="minor modification" ; else m="$*" ; fi
+
+"`dirname $0`"/clean
+
+git_sync_here() {
+  git pull -q --allow-unrelated-histories;
+  if [ \! -z "`git status -s`" ] ; then git commit -q -a -m "$m" ; git push -q ; fi
+  git status -s
+}
+
+
+gits="`find -name .git`"
+
+if [ -z "$gits" ] ; then echo 'No git directory here'; exit 1 ; fi
+
+if [ -d ".git" ] ; then git_sync_here ; fi
+for g in $gits ; do d="`dirname $g`"
+  pushd $d > /dev/null
+  if [ "$d" \!= "." ] ; then echo "In $d" ; fi
+  git_sync_here
+  popd > /dev/null
+done
+
+
