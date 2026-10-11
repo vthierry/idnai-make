@@ -7,7 +7,7 @@
   },
   "plugins": [
     "plugins/markdown",
-    "plugins/jsdoc2"
+    "plugins/docdash2"
   ],
   "markdown": {
     "parser": "gfm"

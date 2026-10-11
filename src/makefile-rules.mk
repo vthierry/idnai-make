@@ -1,23 +1,47 @@
 # These are the idnai makefile rules
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+# - General elements:
+#   - Please refer to the [make](https://www.gnu.org/software/make/manual/make.html) documentation.
+#   - Auto-documented makefile:
+#     - Target's construct of pattern `target: dependencies # [options] Description` yield the usage.
+#     - Lines of pattern '## - Complements' completes the usage in the documentation.
+#   - With [`make -d [option]`](https://www.gnu.org/software/make/manual/html_node/Options-Summary.html#index-_002dd)
+#     - Various debugging information are available.
+#     - If recompiled, the C/C++ `DEBUG` global variable is set.
+>>>>>>> fd2c3c97569b848b31df839804b749fed0f4c1eb
+>>>>>>> e4d850903a6aa3e034a6ff724a8d47524d62533a
+>>>>>>> 4b91f2749361c69388f81f1e0a3c50a44e71e0ea
 
 ## Configures the makefile with bash, in silent mode, avoiding spurious parallelism, and extending path.
 
 export SHELL := /bin/bash
 
-THE_MAKEFILES = makefile $(wildcard node_modules/idnai-*/src/makefile-rules.mk)
+THE_MAKEFILES = makefile $(wildcard ./node_modules/*/src/makefile-rules.mk)
 
 .SILENT: $(shell cat $(THE_MAKEFILES) | sed -n 's/^\([^:]*\):.*/\1/p')
 
 .NOTPARALLEL:
 
-export PATH := $(PWD)/bin $(PWD)/node_modules/.bin $(PATH)
+empty :=
+space := $(empty) $(empty)
+export PATH := ./node_modules/.bin:$(subst $(space),:,$(wildcard ./node_modules/*/bin)):$(PATH)
 
+<<<<<<< HEAD
 export NAME := $(notdir $(PWD))
 
 ### Detects a browser if not yet defined.
 ifeq (,$(BROWSER))
 BROWSERS = chromium firefox google-chrome brave opera
 export BROWSER = $(shell l=($(foreach b,$(BROWSERS),$(shell if which -s $(b) ; then echo $(b) ; fi))) ; echo $${l[0]})
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 4b91f2749361c69388f81f1e0a3c50a44e71e0ea
 endif
 
 ## Detects rules with parameters if any, else shows usage.
@@ -76,13 +100,89 @@ ifneq (,$(shell which http-server))
 else
 	needfor http-server
 	$(MAKE) start
+<<<<<<< HEAD
+=======
+=======
+>>>>>>> e4d850903a6aa3e034a6ff724a8d47524d62533a
 endif
 
-show: # show[=$port] ; Shows a local http:127.0.0.1:$port page, port=8080 by default.
-	$(MAKE) start=$(show)
-	if [ \! -z "$(show)" ] ; then port=8080 ; else port="$(show)" ; fi ;\
-	$(BROWSER) http://127.0.0.1:$$port
+## Detects rules with parameters if any, else shows usage.
 
+<<<<<<< HEAD
+=======
+what := $(strip $(foreach t, install sync start show stop test build, $(if $($(t)),$(t) $(t)=$($(t)),)))
+
+default:
+	$(MAKE) $(if $(what),$(what),usage)
+
+## Shows the makefile usage, extracting automatically the documentation.
+
+## - Please refer to the [make](https://www.gnu.org/software/make/manual/make.html) documentation.
+## - Autodocumented makefile:
+##   - Target's construct of pattern 'target: dependencies # description' yield the usage.
+##   - Lines of pattern '## - …' completes the usage in the documentation.
+## - With [`make -d [option]`](https://www.gnu.org/software/make/manual/html_node/Options-Summary.html#index-_002dd)
+##   - Various debugging information are available.
+##   - If recompiled, the C/C++ `DEBUG` global variable is set.
+
+usage: # usage ; Shows the makefile usage.
+	echo -e 'Usage: make $$command, available commands:'
+	cat $(THE_MAKEFILES) | grep -E '^([a-z_0-9]*: *[^#]*#|#+ *-)' | sed 's/^#*//' | sed 's/[a-z_0-9]*: *[^#]*#//'
+
+help: # help ; Shows a complete help page
+	echo -e 'Usage: make $$command, available commands:'
+	cat $(THE_MAKEFILES) | grep -E '^([a-z_0-9]*: *[^#]*#|#+ *-)' | sed 's/^#*//' | sed 's/[a-z_0-9]*: *[^#]*#//' > docs/make_help.html
+
+## Installation operations
+
+BUILD_INSTALL = node_modules/$(NAME) README.md 
+
+install: $(BUILD_INSTALL) # install[=$package] ; Installs or updates, a given packages or all packages.	
+	chmod -R u+w node_modules package.json package-lock.json
+	npm install --silent $(install)
+	chmod -R a-w node_modules package.json package-lock.json
+
+## - Disclaimer: do NOT use `npm target` directlry but `make target`.
+## - Generates the README.md, package.json, and other installation file, and install what is needed.
+## - Note: creates a link of the present package in node_modules for homogeneity.
+
+node_modules/$(NAME):
+	chmod u+w -R node_modules
+	mkdir -p $@ ; cd $@ ; ln -s ../../* ; rm node_modules
+
+README.md: makefile
+	node_modules/idnai-make/bin/makefile2readmetc
+
+## Manages a local http:127.0.0.1 server
+
+start: # start[=$port] ; Starts, if not yet done, a local http:127.0.0.1:$port server, port=8080 by default..
+ifneq (,$(shell which http-server))
+	if [ \! -z "$(start)" ] ; then port=8080 ; else port="$(start)" ; fi ;\
+	if [ "`urlexists http:127.0.0.1:$$port`" -ne 200 ] ;\
+	then (cd docs ; nohup http-server -a 127.0.0.1 -p $$port 0</dev/null &>/dev/null &) ;\
+	fi
+else
+	needfor http-server
+	$(MAKE) start
+=======
+export NAME := $(notdir $(shell pwd))
+
+### Detects a browser if not yet defined.
+
+ifeq (,$(BROWSER))
+BROWSERS = chromium firefox google-chrome brave opera
+export BROWSER = $(shell l=($(foreach b,$(BROWSERS),$(shell if which -s $(b) ; then echo $(b) ; fi))) ; echo $${l[0]})
+>>>>>>> fd2c3c97569b848b31df839804b749fed0f4c1eb
+>>>>>>> 4b91f2749361c69388f81f1e0a3c50a44e71e0ea
+endif
+
+## Detects rules with parameters if any, else shows usage.
+
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> e4d850903a6aa3e034a6ff724a8d47524d62533a
+>>>>>>> 4b91f2749361c69388f81f1e0a3c50a44e71e0ea
 stop: # stop[=$port] ; Stops, if not yet done, a local http:127.0.0.1:$port server, port=8080 by default..
 	if [ \! -z "$(stop)" ] ; then port=8080 ; else port="$(stop)" ; fi ;\
 	killall http://127.0.0.1:$$port
@@ -115,40 +215,178 @@ BUILD_API = beautify node_modules/jsdoc2 $(subst src/%.md,docs/%.html,$(wildcard
 ###   - The src/introduction.md content and the ./makefile metadata yield the home page.
 ###   - Other markdown documentation is converted to docs/*.html files.
 ###   - It uses [jsdoc](https://jsdoc.app) for all sources, with a variant of the [docdash](https://www.npmjs.com/package/docdash) template.
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+=======
+what := $(strip $(foreach t, install sync start show stop test build, $(if $($(t)),$(t) $(t)=$($(t)),)))
+
+default:
+	$(MAKE) $(if $(what),$(what),usage)
+
+## Shows the makefile usage, extracting automatically the documentation.
+
+usage: # Shows this usage
+	echo -e 'Usage: make $$command [$$arguments]\n Available commands:'
+	cat $(THE_MAKEFILES) | sed  -n 's/^\([a-z_0-9]*\):[^#]*#/  - \1/p' | sed 's/ *[[]/[/' ; ok=
+
+## Installation operations
+
+install: # [=$package] Installs or updates, a given packages or all packages.
+#	Adds the dependency to the makefile and updates the package.json files
+	if [ \! -z "$(install)" ] ; then ./src/install.dir/addinstall $(install) ; fi
+#	Runs the install script from where it exists
+ifneq (,$(wildcard ./node_modules/idnai-make/src/install))
+	./node_modules/idnai-make/src/install
+else ifneq (,$(wildcard ../node_modules/idnai-make/src/install))
+	../node_modules/idnai-make/src/install
+else ifneq (,$(wildcard ./src/install))
+	./src/install
+else
+	$(error Undefined install script, this is a spurious configuration for installation)
+endif
+ifneq (,$(INSTALL))
+	$(MAKE) $(INSTALL)
+endif
+
+## - Disclaimer: better NOT use `npm target` directly but `make target`.
+## - Generates the README.md, package.json, and other installation file, and install what is needed.
+## - Hint: The INSTALL target's variable can be defined in makefile for package specific targets, taken into account after standard install.
+## - Note: a link of the present package is created in node_modules for build homogeneity.
+
+README.md: makefile $(wildcard src/%.md)
+	./node_modules/idnai-make/src/install.dir/mk2package
+
+## Manages build rules
+
+build: # [=[oar|ssh]:$host[/$path]] Builds targets defined by the makefile rules, locally or on an accessible host.
+	if [ -z "$(build)" ] ;\
+	then $(MAKE) $(BUILD_ALL) $(BUILD) ;\
+	else $(MAKE) sync ; ./node_modules/idnai-make/bin/rrun $(build) 'make sync build sync' ; fi
+
+## - Partial installation policy:
+##   - If a software is missing, the rule is silently ignored, assuming it is processed from another checkout.
+## - Remote execution:
+##   - It uses the `rrun` remote execution scripts, see its usage for details.
+##   - The $path is assumed to correspond to a git package installation of the same package on the remote host.
+## - Hint: The BUILD target's variable can be defined in makefile for package specific targets, built after standard targets.
+
+### Defines the API documentation and markdown file's rendering generation
+
+BUILD_API = beautify $(subst src/%.md,docs/%.html,$(wildcard src/*.md)) $(BUILD_API_PY) docs/index.html linkcheck 
+
+### - Building API documentation:
+###   - Documentation is found in src/*.md, */*.js, */*.hpp, */*.mpl, and bin/* files.
+###   - Source file are beautified yielding a standard layout.
+###   - The src/introduction.md content and the ./makefile metadata yield the home page.
+###   - Other markdown documentation is converted to docs/*.html files.
+###   - Implementation details:
+###     - It uses [jsdoc](https://jsdoc.app) for all sources, but Python ones, with a variant of the [docdash](https://www.npmjs.com/package/docdash) template.
+###   - Script usage documentation:
+###     - Bash script usage is by contract implemented in a 'cat <<EOU\nUsage: … \nEOU' construct.
+###     - Node script usage is by contract implemented in a 'console.log(`\nUsage: … \n`);' construct.
+###     - In both cases the syntax is of the form 'Usage: $function_name $arguments\n$one_line_description\n$more_description'.
+>>>>>>> fd2c3c97569b848b31df839804b749fed0f4c1eb
+>>>>>>> e4d850903a6aa3e034a6ff724a8d47524d62533a
+>>>>>>> 4b91f2749361c69388f81f1e0a3c50a44e71e0ea
 ###   - Documentation usage:
 ###     - Classes with lower-case 1st letter are documented as "factory", i.e., set of static methods.
 ###     - The `@extends` tag must be inserted _after_ the `@description`, to generate the proper layout.
 ###     - The `@frame $file`: inserts a iframe displaying the given file.
 ###     - Script one-line usage format is "Usage: $command $arguments ; $description"
+<<<<<<< HEAD
 ###     - Non JavaScript source file must explicit all documentation fields, as exemplified [here](https://github.com/vthierry/idnai-json/blob/main/src/wJSON.cpp).
+=======
+<<<<<<< HEAD
+###     - Non JavaScript source file must explicit all documentation fields, as exemplified [here](https://github.com/vthierry/idnai-json/blob/main/src/wJSON.cpp).
+=======
+<<<<<<< HEAD
+###     - Non JavaScript source file must explicit all documentation fields, as exemplified [here](https://github.com/vthierry/idnai-json/blob/main/src/wJSON.cpp).
+=======
+###     - Non JavaScript source file must have all documentation fields explicit, as exemplified [here](https://github.com/vthierry/idnai-json/blob/main/src/wjson.hpp).
+
+### Properly renders the markdown files (with the @frame tag, if any).
+
+docs/%.html: src/%.md
+	subst "@frame\\s+([^\\s]+)" "<p><center><iframe style='width: 100%; height: calc(66vh);' src='$1'></iframe></center><a href='$$1' target='_blank'>&nbsp;&nbsp;(open in new tab)</a></p>" $^ | md2html > $@
+
+#### Normalize the source file layout
+>>>>>>> fd2c3c97569b848b31df839804b749fed0f4c1eb
+>>>>>>> e4d850903a6aa3e034a6ff724a8d47524d62533a
+>>>>>>> 4b91f2749361c69388f81f1e0a3c50a44e71e0ea
 
 beautify:
 ifneq (,$(shell which js-beautify))
-	for f in $(wildcard */*.js) ; do cp -p $$f $$f~ ; touch $$f~ -r $$f ; js-beautify -q -s 2 -n -r $$f ; touch $$f -r $$f~ ; done
+	for f in `ls {bin,docs,src}/*.js 2>/dev/null` ; do cp -p $$f $$f~ ; touch $$f~ -r $$f ; js-beautify -q -s 2 -n -r $$f ; touch $$f -r $$f~ ; done
 endif
 ifneq (,$(shell which css-beautify))
-	for f in $(wildcard */*.css) ; do cp -p $$f $$f~ ; touch $$f~ -r $$f ; css-beautify -q -s 2 -n -r $$f ; touch $$f -r $$f~ ; done
+	for f in `ls {bin,docs,src}/*.css 2>/dev/null` ; do cp -p $$f $$f~ ; touch $$f~ -r $$f ; css-beautify -q -s 2 -n -r $$f ; touch $$f -r $$f~ ; done
 endif
 ifneq (,$(shell which uncrustify))
+<<<<<<< HEAD
 	for f in $(wildcard src/*.hpp) $(wildcard src/*.cpp) $(wildcard src/*.C) ; do cp -p $$f $$f~ ; touch $$f~ -r $$f ; uncrustify -q -c node_modules/adnai-make/src/uncrustify.cfg -f $$f~ -o $$f ; touch $$f -r $$f~ ; done ; fi
+=======
+<<<<<<< HEAD
+	for f in $(wildcard src/*.hpp) $(wildcard src/*.cpp) $(wildcard src/*.C) ; do cp -p $$f $$f~ ; touch $$f~ -r $$f ; uncrustify -q -c node_modules/adnai-make/src/uncrustify.cfg -f $$f~ -o $$f ; touch $$f -r $$f~ ; done ; fi
+=======
+<<<<<<< HEAD
+	for f in $(wildcard src/*.hpp) $(wildcard src/*.cpp) $(wildcard src/*.C) ; do cp -p $$f $$f~ ; touch $$f~ -r $$f ; uncrustify -q -c node_modules/adnai-make/src/uncrustify.cfg -f $$f~ -o $$f ; touch $$f -r $$f~ ; done ; fi
+=======
+	for f in `ls src/*.{hpp,cpp,C} 2>/dev/null` ; do cp -p $$f $$f~ ; touch $$f~ -r $$f ; uncrustify -q -c ./node_modules/idnai-make/src/uncrustify.cfg -f $$f~ -o $$f ; touch $$f -r $$f~ ; done ; fi
+>>>>>>> fd2c3c97569b848b31df839804b749fed0f4c1eb
+>>>>>>> e4d850903a6aa3e034a6ff724a8d47524d62533a
+>>>>>>> 4b91f2749361c69388f81f1e0a3c50a44e71e0ea
 endif
 
-node_modules/docdash2:
-	mkdir -p $@
-	cp -rf {node_modules/docdash/{static,tmpl},node_modules/idnai/src/docdash2/publish.js} $@
-	cp  ./docdash2/docdash2.js node_modules/jsdoc/plugins
+#### Installs the docdash template variant.
 
+./node_modules/docdash2:
+	mkdir -p $@
+	cp -rf ./node_modules/{docdash/{static,tmpl},idnai-make/src/docdash2/{config.json,publish.js}} $@
+	cp ./node_modules/idnai-make/src/docdash2/docdash2.js ./node_modules/jsdoc/plugins
+
+<<<<<<< HEAD
 node_modules/docdash2/tmp/usage.js : $(wildcard bin/[a-z0-9]*)
 	grep -E '(# |")Usage *:' $^ | subst '.*(# |")(Usage *:[^;]*);(.*)' "/**\n* \$$2\n@global\n-\$$1" > $@
 
 docs/index.html: README.md $(wildcard */*.hpp) $(wildcard */*.js) $(wildcard */*.sh)
 	jsdoc -c node_modules/adnai-make/src/docdash2/config.json -t node_modules/docdash2 -R README.md -d docs node_modules/docdash2/tmp/usage.js $(sort $(wildcard *.js))
+=======
+<<<<<<< HEAD
+node_modules/docdash2/tmp/usage.js : $(wildcard bin/[a-z0-9]*)
+	grep -E '(# |")Usage *:' $^ | subst '.*(# |")(Usage *:[^;]*);(.*)' "/**\n* \$$2\n@global\n-\$$1" > $@
+>>>>>>> 4b91f2749361c69388f81f1e0a3c50a44e71e0ea
 
-### Renders the markdown files
+docs/index.html: README.md $(wildcard */*.hpp) $(wildcard */*.js) $(wildcard */*.sh)
+	jsdoc -c node_modules/adnai-make/src/docdash2/config.json -t node_modules/docdash2 -R README.md -d docs node_modules/docdash2/tmp/usage.js $(sort $(wildcard *.js))
+=======
+<<<<<<< HEAD
+node_modules/docdash2/tmp/usage.js : $(wildcard bin/[a-z0-9]*)
+	grep -E '(# |")Usage *:' $^ | subst '.*(# |")(Usage *:[^;]*);(.*)' "/**\n* \$$2\n@global\n-\$$1" > $@
+>>>>>>> e4d850903a6aa3e034a6ff724a8d47524d62533a
 
-docs/%.html: src/%.md
-	node_modules/idnai-make/bin/subst "@frame\\s+([^\\s]+)" "<p><center><iframe style='width: 100%; height: calc(66vh);' src='$1'></iframe></center><a href='$$1' target='_blank'>&nbsp;&nbsp;(open in new tab)</a></p>" $^ | node_modules/idnai-make/bin/md2html > $@
+docs/index.html: README.md $(wildcard */*.hpp) $(wildcard */*.js) $(wildcard */*.sh)
+	jsdoc -c node_modules/adnai-make/src/docdash2/config.json -t node_modules/docdash2 -R README.md -d docs node_modules/docdash2/tmp/usage.js $(sort $(wildcard *.js))
+=======
+#### Converts bin and make usage's documentations in jsdoc one.
+>>>>>>> fd2c3c97569b848b31df839804b749fed0f4c1eb
 
+<<<<<<< HEAD
+=======
+./.~/mk.js: $(THE_MAKEFILES)
+	mkdir -p $(@D)
+	./node_modules/idnai-make/src/docdash2/mk2doc $^ > $@
+
+<<<<<<< HEAD
+=======
+./.~/bin.js : $(wildcard bin/[a-z0-9]*)
+	mkdir -p $(@D)
+	./node_modules/idnai-make/src/docdash2/bin2doc $^ > $@
+
+<<<<<<< HEAD
+>>>>>>> e4d850903a6aa3e034a6ff724a8d47524d62533a
+>>>>>>> 4b91f2749361c69388f81f1e0a3c50a44e71e0ea
 ## Defines latex and related files compilation.
 
 ### - Building complementary documentation:
@@ -163,9 +401,74 @@ docs/%.html: src/%.md
 ###   - Drawings built with [libreoffice](https://fr.libreoffice.org) `tex/*.odg are processed as `tex/*.png`.
 
 LATEX_MAINS = $(foreach f,$(wildcard */*.tex),$(if $(shell head -1 $(f) | grep '\\documentclass'),$(f),))
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+=======
+#### Generates Python documentation if any
+
+ifneq (,$(wildcard src/*.py))
+
+BUILD_API_PY = docs/py/index.html
+
+docs/py/index.html: $(wildcard src/*.py)
+	mkdir -p $(@D)
+	pdoc --footer-text "`date +'%Y-%m-%d %H:%M:%S'` version"  $^ -o docs/py
+
+endif
+
+#### Runs jsdoc with linkcheck
+
+docs/index.html: README.md ./node_modules/docdash2 .~/mk.js .~/bin.js $(shell ls {docs,bin,src}/*.{hpp,js,mpl} 2>/dev/null)
+	jsdoc -c ./node_modules/docdash2/config.json -t ./node_modules/docdash2 -R README.md -d docs $(sort $(wildcard src/*js) $(wildcard docs/*js)) .~/mk.js .~/bin.js
+
+linkcheck:
+	for l in `cat docs/*.html | tr ">" "\n" | tr "<" "\n" | grep -E '(href|src) *= *.http' | sed 's/.*http/http/' | sed "s/[\"'].*//"` ;\
+	do if [ \! -z "`urlexists $$l`" ] ; then echo "Broken link: $$l" ; fi ;\
+	done
+
+### Defines maple processing for file generation.
+
+### - Generating code and drawings from computer algebra:
+###   - Batch [maple](https://www.maplesoft.com) `*/*.mpl` files are processed.
+###     - This allows to generate figures or other tex elements.
+###     - A `*/*.mpl.out.txt` output is produced.
+###       - This file contains errors if any, otherwise the maple process trace.
+###     - The [idnai-sys](https://github.com/vthierry/idnai-sys) package shares useful functions.
+###   - If [maple](https://www.maplesoft.com) is not available locally,
+###     - A `build=host` command on an ssh available host with another checkout and maple installed makes the job.
+###   - Typical usage is:
+###     - Piece of code generation translated from algebra derivation, e.g. using the [maple2h](https://vthierry.github.com/idnai-sys/maple2h.html) function.
+###     - Graphics defined in the maple source, e.g. using the [maple2jpg](https://vthierry.github.com/idnai-sys/maplejpg) function.
+###     - LaTeX formulas or piece of text files, programmed in the maple source, e.g. using the [latex](https://www.maplesoft.com/support/help/Maple/view.aspx?path=latex) function.
+
+### Applies maple on maple souce file keeping trace locally of the output.
+
+ifneq (,$(shell which maple))
+%.mpl.out.txt: %.mpl
+	cd $(@D) ; maple ../$^ > ../$@
+	git add $@
+endif
+
+### Defines latex and related files compilation.
+
+### - Building complementary documentation:
+###   - [LaTeX](https://www.latex-project.org) document or presentation:
+###     - Input latex files are `tex/*.tex` or `src/*.tex` with a \documentclass header.
+###     - Output latex files are `docs/*.pdf`.
+###     - The `beamer` package is recommended for slides.
+###   - Drawings built with [libreoffice](https://fr.libreoffice.org) `tex/*.odg are processed as `tex/*.png`.
+###   - Drawings built with [maple](https://www.maplesoft.com) `*/*.mpl` files are also taken into account.
+
+LATEX_MAINS = $(foreach f,$(shell ls {src,tex}/*.tex 2>/dev/null),$(if $(shell head -1 $(f) | grep '\\documentclass'),$(f),))
+>>>>>>> fd2c3c97569b848b31df839804b749fed0f4c1eb
+>>>>>>> e4d850903a6aa3e034a6ff724a8d47524d62533a
+>>>>>>> 4b91f2749361c69388f81f1e0a3c50a44e71e0ea
 BUILD_LATEX = $(patsubst %.odg,%.png,$(wildcard %/*.odg)) $(patsubst %.mpl,%.mpl.out.txt,$(wildcard %/*.mpl)) $(patsubst tex/%.tex,docs/%.pdf,$(patsubst src/%.tex,tex/%.tex,$(LATEX_MAINS)))
 
 ### Applies pdflatex with the proper options and cleans all temporary unused files.
+
 ifneq (,$(shell which pdflatex))
 docs/%.pdf: tex/%.tex $(wildcard tex/*.bib) $(filter-out $(LATEX_MAINS),$(wildcard tex/*.tex))
 	cd tex; pdflatex -halt-on-error -draftmode $* ; bibtex $* ; pdflatex -halt-on-error -draftmode $* ; pdflatex -halt-on-error $* ; grep -i undefined $*.log ; rm -f $*.aux $*.bbl $*.blg $*.toc $*.nav $*.snm $*.out ; ok=
@@ -178,21 +481,78 @@ docs/%.pdf: src/%.tex $(wildcard src/*.bib) $(filter-out $(LATEX_MAINS),$(wildca
 	git add $@
 endif
 
-### Applies maple on maple souce file keeping trace locally of the output.
-ifneq (,$(shell which maple))
-%.mpl.out.txt: %.mpl
-	cd $(@D) ; maple ../$^ > ../$@
-	git add $@
-endif
-
 ### Compiles libreoffice drawings.
+
 ifneq (,$(shell which libreoffice))
 %.png : %.odg
 	libreoffice --headless --convert-to png --outdir $(@D) $^
 	git add $@
 endif
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> e4d850903a6aa3e034a6ff724a8d47524d62533a
+>>>>>>> 4b91f2749361c69388f81f1e0a3c50a44e71e0ea
 ## Defines C++ compilation rules
+=======
+### Defines C++ compilation rules
+
+### - Building C/C++ library and executable.
+###   - On input:
+###     - Headers and documentation are .hpp files.
+###     - Object implementation are in .cpp files.
+###     - Main programs are in .C files.
+###     - Any available maple batch file is processed, for code generation.
+###     - Any `./src/%_hpp.html` file generates a `./src/%.hpp` file with the web page as constant C/C++ string.
+###   - For compilation:
+###     - The `clang`, `g++`, or `c++` in this order, if available.
+###     - The include path considers all `./node_modules/*/src` directories.
+###     - The `uname -s` value is set as the OS variable.
+###     - A maximal number of warning, debug information, and optimisation is performed.
+###     - Actually the `-std=c++17` C++ standard is in use.
+###   - On output:
+###     - All compiled objects are in `./node_modules/.lib/libcpp.so`.
+###     - All executable program are in `./node_modules/.bin/%` files.
+###   - Hints:
+###     - With `make -d …` the DEBUG global variable is set.
+###     - Undefined symbols defined in a .hpp fils but not implemented in a .cpp file appears using
+###       - `nm -C --demangle --undefined-only ./node_modules/.lib/libcpp.so | grep $name`
+>>>>>>> fd2c3c97569b848b31df839804b749fed0f4c1eb
+
+### - Building C/C++ library and executable.
+###   - On input:
+###     - Headers and documentation are .hpp files.
+###     - Object implementation are in .cpp files.
+###     - Main programs are in .C files.
+###     - Any available maple batch file is processed, for code generation.
+###   - For compilation:
+###     - The `clang`, `g++`, or `c++` in this order, if available.
+###     - The include path considers all `node_modules/*/src` directories.
+###     - The `uname -s` value is set as the OS variable.
+###     - With `make -d …` the DEBUG global variable is set.
+###     - A maximal number of warning, debug information, and optimisation is performed.
+###   - On output:
+###     - All compiled objects are in `node_modules/libcpp.so`.
+###     - All executable program are in `node_modules/.bin/%` files.
+
+### - Building C/C++ library and executable.
+###   - On input:
+###     - Headers and documentation are .hpp files.
+###     - Object implementation are in .cpp files.
+###     - Main programs are in .C files.
+###     - Any available maple batch file is processed, for code generation.
+###   - For compilation:
+###     - The `clang`, `g++`, or `c++` in this order, if available.
+###     - The include path considers all `node_modules/*/src` directories.
+###     - The `uname -s` value is set as the OS variable.
+###     - With `make -d …` the DEBUG global variable is set.
+###     - A maximal number of warning, debug information, and optimisation is performed.
+###   - On output:
+###     - All compiled objects are in `node_modules/libcpp.so`.
+###     - All executable program are in `node_modules/.bin/%` files.
 
 ### - Building C/C++ library and executable.
 ###   - On input:
@@ -213,22 +573,43 @@ endif
 CCP = $if($(which clang),clang,$if($(which g++),g++,$if($(which c++),c++,)))
 
 ifneq (,$(CPP))
+ifneq (,$(wildcard src/*.cpp)$(wildcard src/*.C)) 
 
 OS=$(shell uname -s) 
 
 CPP_FLAGS = -g -fPIC -Wall -std=c++17 -O3 -D OS=$(OS) \
- $(patsubst %,-I%,$(wildcard node_modules/*/src) $(wildcard /usr/include/python3.*) /usr/local/Frameworks/Python.framework/Headers)
+ $(patsubst %,-I%,$(wildcard ./node_modules/*/src) $(wildcard /usr/include/python3.*) /usr/local/Frameworks/Python.framework/Headers)
 
 ifeq (-d,$(findstring -d,$(MAKEFLAGS)))
 CPP_FLAGS += -D DEBUG
 endif
 
+<<<<<<< HEAD
 BUILD_CPP = $(patsubst %.mpl,%.mpl.out.txt,$(wildcard node_modules/*/src/*.mpl)) $(patsubst %.cpp,%.o,$(wildcard node_modules/*/src/*.cpp)) node_modules/libcpp.so $(patsubst src/%.C,bin/%,$(wildcard node_modules/*/src/*.C)) 
+=======
+<<<<<<< HEAD
+BUILD_CPP = $(patsubst %.mpl,%.mpl.out.txt,$(wildcard node_modules/*/src/*.mpl)) $(patsubst %.cpp,%.o,$(wildcard node_modules/*/src/*.cpp)) node_modules/libcpp.so $(patsubst src/%.C,bin/%,$(wildcard node_modules/*/src/*.C)) 
+=======
+<<<<<<< HEAD
+BUILD_CPP = $(patsubst %.mpl,%.mpl.out.txt,$(wildcard node_modules/*/src/*.mpl)) $(patsubst %.cpp,%.o,$(wildcard node_modules/*/src/*.cpp)) node_modules/libcpp.so $(patsubst src/%.C,bin/%,$(wildcard node_modules/*/src/*.C)) 
+=======
+BUILD_CPP = $(patsubst %.mpl,%.mpl.out.txt,$(wildcard src/*.mpl)) $(patsubst %_hpp.html,%.hpp,$(wildcard src/*_hpp.html)) ./node_modules/.lib/libcpp.so $(patsubst src/%.C,./node_modules/.bin/%,$(wildcard src/*.C)) 
+
+#### Automatic headers generation
+
+%.hpp: %_hpp.html
+	@(echo -n "static char $*[] = \"" ; tr "\n" " " < $^ | sed 's/"/\\"/g' | sed 's/  */ /g' ; echo "\";") > $@
+
+#### Source object compilation
+>>>>>>> fd2c3c97569b848b31df839804b749fed0f4c1eb
+>>>>>>> e4d850903a6aa3e034a6ff724a8d47524d62533a
+>>>>>>> 4b91f2749361c69388f81f1e0a3c50a44e71e0ea
 
 %.o: %.cpp
 	$(CPP) -c $(CPP_FLAGS) $^
 
-node_modules/libcpp.so : $(patsubst %.cpp,%.o,$(wildcard node_modules/*/src/*.cpp))
+./node_modules/.lib/libcpp.so : $(patsubst %.cpp,%.o,$(wildcard ./node_modules/*/src/*.cpp))
+	mkdir -p $(@D)
 	$(CPP) -o $@ -fPIC -shared $^
 
 CPP_LIBS = node_modules/libcpp.so -lstdc++ -lm $(shell find /usr/lib -name 'libpython3.*.so' | head -1)
@@ -236,19 +617,54 @@ ifneq (mingw64,$(OS))
 CPP_LIBS  += -lcurl
 endif
 
+<<<<<<< HEAD
 node_modules/.bin/%: src/%.C
+=======
+<<<<<<< HEAD
+node_modules/.bin/%: src/%.C
+=======
+<<<<<<< HEAD
+node_modules/.bin/%: src/%.C
+=======
+./node_modules/.bin/%: src/%.C
+>>>>>>> fd2c3c97569b848b31df839804b749fed0f4c1eb
+>>>>>>> e4d850903a6aa3e034a6ff724a8d47524d62533a
+>>>>>>> 4b91f2749361c69388f81f1e0a3c50a44e71e0ea
 	$(CPP) -o $@ $(CPP_FLAGS) $^ $(CPP_LIBS)
 
+endif
 endif
 
 ## Tests mechanisms 
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> e4d850903a6aa3e034a6ff724a8d47524d62533a
+>>>>>>> 4b91f2749361c69388f81f1e0a3c50a44e71e0ea
 test: # test[=file] [argv="arg1 …"] ; Runs a given src/$file file, if specified, or all functional and non-regression src/test.* test files.
 	if [ -z "$(test)" ] ; then \
           for e in C sh js py mpl html ; do if [ -f test.$$e ] ; then $(MAKE) test=test.$$e ; fi ; done \
         else \
 	  switch($(suffix $(test))) { \
 	    case 'C' : $(MAKE) $(BUILD_CPP) ; $(MAKE) test=node_modules_/.bin/$(basename $(test)) $(argv) ;;\
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+=======
+test: # [=$file] [argv="$arg1 …"] Runs a given `src/$file` test file, if specified. Otherwise, runs all `src/test.*` files.
+	if [ -z "$(test)" ] ; then \
+          for e in C sh js py mpl html ; do if [ -f test.$$e ] ; then $(MAKE) test=test.$$e ; fi ; done \
+	  if [ \! -z "$(TEST)" ] ; then $(MAKE) $(TEST) ; fi \
+        else \
+	  switch($(suffix $(test))) { \
+	    case 'C' : $(MAKE) $(BUILD_CPP) ; $(MAKE) test=./node_modules/.bin/$(basename $(test)) $(argv) ;;\
+>>>>>>> fd2c3c97569b848b31df839804b749fed0f4c1eb
+>>>>>>> e4d850903a6aa3e034a6ff724a8d47524d62533a
+>>>>>>> 4b91f2749361c69388f81f1e0a3c50a44e71e0ea
 	    case 'sh' : case 'js' : chmod a+rx src/$(test) ; ./src/$(test) $(argv) ;;\
             case 'py' : python3 ./src/(test) ;;\
 	    case 'mpl' : $(MAKE) ./src/$(test).out.txt ;;\
@@ -256,6 +672,13 @@ test: # test[=file] [argv="arg1 …"] ; Runs a given src/$file file, if specifie
 	    default: echo "Error: The $(test) extension is not managed." ;; \
          }\
 	fi	
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> e4d850903a6aa3e034a6ff724a8d47524d62533a
+>>>>>>> 4b91f2749361c69388f81f1e0a3c50a44e71e0ea
 
 ifneq (,$(which gdb))
 gtest: $(BUILD_CPP) # gtest[=file] [argv="arg1 …"] ; Runs a given test CPP file with gdb.
@@ -276,19 +699,104 @@ endif
 endif
 
 ## Integrates idnai derived packages makefile rules if any 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+=======
+>>>>>>> e4d850903a6aa3e034a6ff724a8d47524d62533a
+>>>>>>> 4b91f2749361c69388f81f1e0a3c50a44e71e0ea
 
-ifneq (,$(shell find -wholename node_modules/idnai-esp32/src/makefile-rules.mk))
-include node_modules/idnai-esp32/src/makefile-rules.mk
+## - The `src/test.{C,sh,js,py,mpl,html}` files contains the functional and non-regression tests.
+##    - It is run after installation or before publication to validate the package.
+##    - By contract:
+##      - Such a test is silent on success and output human readable message on failure.
+##      - It is executed in little time (less or about a second) to avoid blocking the installation process.
+## - Hint: The TEST target's variable can be defined in makefile for package specific targets, run after standard defined tests.
+## - Hint: The `demo` target is dedicated to benckmarks, interactive execution, etc…
+
+ifneq (,$(which gdb))
+gtest: $(BUILD_CPP) # [=$file] [argv="$arg1 …"] Runs a given C/C++ file with gdb, for debug.
+	if [ -z "$(gtest)" ] ; then test="test" ; else test="$(basename $(gtest))" ; fi \
+	unset DEBUGINFOD_URLS ;	(echo "break exit" ; echo "run $(argv)" ; echo "echo --- backtrace ------------------------------------------------------------------------------\n" ; echo "backtrace" ; echo "echo --- backtrace full -------------------------------------------------------------------------\n" ; echo "backtrace full" ; echo "quit 0") > /tmp/a.cmd ;\
+	gdb -n -q ./node_modules/.bin/$$test -x /tmp/a.cmd --return-child-result 2>&1 ; ok=
+else 
+	echo "You need to `sudo apt install gdb` for `make gtest`."
 endif
 
+<<<<<<< HEAD
 ## Builds or cleans all files defined by the previous rules.
 
 BUILD = $(BUILD_API) $(BUILD_LATEX) $(BUILD_CPP) $(BUILD_ESP32)
+=======
+<<<<<<< HEAD
+## Builds or cleans all files defined by the previous rules.
 
-clean: # clean ; Removes all targets defined by the makefile rules.
-	node_modules/idnai-make/bin/clean
-	/bin/rm -rf $(BUILD)
+BUILD = $(BUILD_API) $(BUILD_LATEX) $(BUILD_CPP) $(BUILD_ESP32)
+=======
+ifneq (,$(which valgrind))
+vtest: $(BUILD_CPP) # [=$file] [argv="$arg1 …"] Runs a given C/C++ file with valgrind, for debug.
+	if [ -z "$(vtest)" ] ; then test="test" ; else test="$(basename $(vtest))" ; fi \
+	ulimit -s 100000 2>/dev/null ; export GLIBCXX_FORCE_NEW=1 ; valgrind --max-stackframe=100000000 --track-origins=yes ./node_modules/.bin/$$test $(argv)
+else 
+	echo "You need to `sudo apt install valgrind` for `make vtest`."
+endif
 
+## Demo
+>>>>>>> fd2c3c97569b848b31df839804b749fed0f4c1eb
+
+demo:  # Runs, if any, a demonstration of the present package.
+ifneq (,$(wildcard bin/demo))
+	bin/demo
+endif
+ifneq (,$(DEMO))
+	$(MAKE) $(DEMO)
+endif
+ifeq (,$(wildcard bin/demo) $(DEMO))
+	echo "No demo available for this package"
+endif
+
+<<<<<<< HEAD
+## Builds or cleans all files defined by the previous rules.
+
+BUILD = $(BUILD_API) $(BUILD_LATEX) $(BUILD_CPP) $(BUILD_ESP32)
+=======
+## - This optional target allows to execute any interactive demonstration of the package, or benchmark, etc.
+##   - By contract, a demo is interactive, does not require parameter, and is auto-documented.
+## - The bin/demo executable and/or the DEMO target's variable, run after the executable if both are defined.
+
+## Builds or cleans all files defined by the previous rules.
+
+BUILD_ALL = $(BUILD_API) $(BUILD_LATEX) $(BUILD_CPP) $(BUILD_ESP32)
+
+clean: # Removes all targets defined by the makefile rules.
+	clean
+	/bin/rm -rf README.md $(BUILD_ALL) $(BUILD)
+
+rebuild: clean build  # Cleans and builds all targets defined by the makefile rules.
+
+## Manages a local http:127.0.0.1 server
+
+start: # [=$port] Starts, if not yet done, a local 'http:127.0.0.1:$port' server, port=8080 by default.
+ifneq (,$(shell which http-server))
+	if [ \! -z "$(start)" ] ; then port=8080 ; else port="$(start)" ; fi ;\
+	if [ "`urlexists http:127.0.0.1:$$port`" -ne 200 ] ;\
+	then (cd docs ; nohup http-server -a 127.0.0.1 -p $$port 0</dev/null &>/dev/null &) ;\
+	fi
+else
+	needfor http-server
+	$(MAKE) start
+endif
+>>>>>>> fd2c3c97569b848b31df839804b749fed0f4c1eb
+>>>>>>> e4d850903a6aa3e034a6ff724a8d47524d62533a
+>>>>>>> 4b91f2749361c69388f81f1e0a3c50a44e71e0ea
+
+show: # [=$port] Shows a local 'http:127.0.0.1:$port' page, port=8080 by default.
+	$(MAKE) start=$(show)
+	if [ \! -z "$(show)" ] ; then port=8080 ; else port="$(show)" ; fi ;\
+	$(BROWSER) http://127.0.0.1:$$port
+
+<<<<<<< HEAD
 rebuild: clean build  # rebuild ; Cleans and builds all targets defined by the makefile rules.
 
 ## Force synchronization with respect to git repositories
@@ -299,8 +807,44 @@ sync: # sync[=$message] ; Synchronizes files with respect to the github reposito
 ## Force synchronization with respect to git repositories
 
 publis: # publish ; Publishes on the npmjs repository.
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+=======
+stop: # [=$port] Stops, if not yet done, a local 'http:127.0.0.1:$port' server, port=8080 by default.
+	if [ \! -z "$(stop)" ] ; then port=8080 ; else port="$(stop)" ; fi ;\
+	killall http://127.0.0.1:$$port
+
+## - It renders the ./docs directory.
+
+## Force synchronization with respect to git repositories
+
+sync: # [=$message] Synchronizes files with respect to the github repositories.
+	git_sync $(sync)
+
+## Force synchronization with respect to git repositories
+
+publish: # Publishes on the npmjs repository.
+>>>>>>> fd2c3c97569b848b31df839804b749fed0f4c1eb
+>>>>>>> e4d850903a6aa3e034a6ff724a8d47524d62533a
+>>>>>>> 4b91f2749361c69388f81f1e0a3c50a44e71e0ea
 	npm adduser
 	npm publish --access-public
 
 ## - To publish or update a package on `https://registry.npmjs.org/`
 ##   - Properly update the [version number](https://docs.npmjs.com/about-semantic-versioning) in the makefile metadata, before `make publish`.
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+## - To manually archived on [https://archive.softwareheritage.org](https://archive.softwareheritage.org).
+##   - Use [this link](https://archive.softwareheritage.org/save/list/) to save it.
+##     - Enter `git` in `Origin type`
+##     - Enter the documentation link, e.g. `https://github.com/$login}/$name`
+##     - And you are done.
+>>>>>>> fd2c3c97569b848b31df839804b749fed0f4c1eb
+>>>>>>> e4d850903a6aa3e034a6ff724a8d47524d62533a
+>>>>>>> 4b91f2749361c69388f81f1e0a3c50a44e71e0ea

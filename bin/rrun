@@ -1,0 +1,76 @@
+#!/bin/bash
+
+usage() {
+  cat <<EOU
+Usage: rrun [ssh|oar]:\$host[/\$path] \$what
+Performs a remote job execution.
+- Options:
+  - The mode of remote execution.
+    - ssh: Uses a ssh remote shell (default).
+    - oar: Uses a oarsub job submission on a cluster gateway considering a default node.
+  - \$host: The host or cluster gateway where to run the job.
+  - \$path: The path where to run the job (current home directory by default).
+  - \$what: The remote script to run.
+    - It may contains arguments using single quotes, e.g., 'myjob --name value'.
+    - In oar mode, the command line may contain oarsub options prefixes, e.g., --resource <DESCRIPTION>[,<WALLTIME>] 'myjob --name value'.
+      - Pertinent oarsub options are --resource, --checkpoint (with --signal), --type, --project, --name, whereas other options are either already specified by rrun or not appropriate in this context.
+- The rrun.{stdout,stderr} files contain the stdout add stderr script outputs respectively, stdin is not used.
+- In oar mode, this script waits until job execution terminates.
+- The local version of the job script is copied on the target host before remote execution.
+EOU
+}
+
+## Argument parsing: $method, $host, $path, $options, $fscript, $script, $args
+
+if [ -z "$2" -o "$1" = -h -o "$1" = --help ] ; then usage ; exit ; fi
+if [[ "$1" == *":"* ]] ; then method="`echo $1 | sed 's/:.*//'`" ; host="`echo $1 | sed 's/.*://'`" ; else method="ssh" ; host="$1" ; fi
+if [[ "$host" == *"/"* ]] ; then path="`echo $host | sed 's/.*\\///'`" ; host="`echo $host | sed 's/\\/.*//'`" ; else path="." ; fi
+options="${@:2:$#-2}" ; fscript="${!#}"
+if [[ "$fscript" == *" "* ]] ; then args="`echo \"$fscript\" | sed 's/[^ ]* //'`" ; fscript="`echo \"$fscript\" | sed 's/ .*//'`" ; else args="" ; fi
+script="`basename $fscript`"
+
+echo "Notice: rrun $method : $host / $path for $fscript [ $options ] => '$script $args'"
+
+## Remote execution implementation
+
+case "$method" in
+  oar) 
+    ### Cleans previous files
+    /bin/rm -f rrun.std*
+    ssh $host "/bin/rm -f rrun.std* $path/rrun.std*"
+    
+    ### Uploads the script to execute
+    ssh $host "mkdir -p $path"
+    rsync "$fscript" "$host:$path"
+    ssh $host "chmod a+rx $path/$script"
+
+    ### Submits the job
+    ssh $host "cd $path ; oarsub -J -O rrun.stdout -E rrun.stderr $options '$script $args'" | tr '\n' ' '
+    
+    ### Waits until job is done
+    echo -n ' '
+    while ! ssh $host "test -e $path/rrun.stderr"
+    do sleep 2 ; echo -n '.'
+    done
+    sleep 1 ; echo ### To guaranty dump is finished
+    
+    ### Downloads the output
+    rsync "$host:$path/rrun.std*" .
+    ;;
+  ssh)
+    ### Cleans previous files
+    /bin/rm -f rrun.std*
+
+    ### Uploads the script to execute
+    rsync "$fscript" "$host:$path"
+
+    ### Submits the job
+    ssh $options "bash -c 'cd $path ; $script $args'" >rrun.stdout 2>rrun.stderr
+    ;;
+  * ) usage ; exit ;;
+esac
+
+
+
+
+
