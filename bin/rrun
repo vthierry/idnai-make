@@ -27,7 +27,7 @@ if [[ "$1" == *":"* ]] ; then method="`echo $1 | sed 's/:.*//'`" ; host="`echo $
 if [[ "$host" == *"/"* ]] ; then path="`echo $host | sed 's/.*\\///'`" ; host="`echo $host | sed 's/\\/.*//'`" ; else path="." ; fi
 options="${@:2:$#-2}" ; fscript="${!#}"
 if [[ "$fscript" == *" "* ]] ; then args="`echo \"$fscript\" | sed 's/[^ ]* //'`" ; fscript="`echo \"$fscript\" | sed 's/ .*//'`" ; else args="" ; fi
-script="`basename $fscript`"
+script="./`basename $fscript`"
 
 echo "Notice: rrun $method : $host / $path for $fscript [ $options ] => '$script $args'"
 
@@ -65,7 +65,7 @@ case "$method" in
     rsync "$fscript" "$host:$path"
 
     ### Submits the job
-    ssh $options "bash -c 'cd $path ; $script $args'" >rrun.stdout 2>rrun.stderr
+    ssh $host "bash -c 'cd $path ; $script $args'" >rrun.stdout 2>rrun.stderr
     ;;
   * ) usage ; exit ;;
 esac

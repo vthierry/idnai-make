@@ -2,11 +2,6 @@
 
 const fs = require("fs");
 
-<<<<<<< HEAD
-if (process.argv.length < 4) {
-  console.log("Usage: subst $pattern $replacement [$input [$output]] ; Replaces a string using Javascript regular expressions, newline is treated as a standard char.");
-  exit();
-=======
 if (process.argv.length > 2 && ["-h", "--help"].includes(process.argv[2]) || ![4, 5, 6].includes(process.argv.length)) {
   console.log(`
 Usage: subst $pattern $replacement [$input [$output]]
@@ -16,7 +11,6 @@ Replaces a string using Javascript regular expressions.
 - The input and output can be the same file.
 `);
   process.exit();
->>>>>>> fd2c3c97569b848b31df839804b749fed0f4c1eb
 }
 
 // Implements a textual transform `output = transform(input)` managing $input $output, with file backup

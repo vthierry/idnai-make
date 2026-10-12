@@ -15,11 +15,6 @@ let md = new MarkdownIt();
 md.use(require("markdown-it-anchor").default);
 md.use(require("markdown-it-table-of-contents"));
 
-<<<<<<< HEAD
-if (process.argv.length >= 3 && "-h -H -help --help".include(process.argv[2])) {
-  console.log("Usage: md2html [$markdown-input [$markdown-output]] ; Renders a markdown input in html.");
-  exit();
-=======
 // Implements a textual transform `output = transform(input)` managing $input $output, with file backup
 function transform(transform, argv) {
   const error = function(message) {
@@ -41,7 +36,6 @@ function transform(transform, argv) {
     fs.writeFileSync(argv[1], output);
   } else
     console.log(output);
->>>>>>> fd2c3c97569b848b31df839804b749fed0f4c1eb
 }
 
 transform(input => md.render(input), argv.slice(2));

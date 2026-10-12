@@ -16,24 +16,16 @@ if [ -z "$*" ] ; then m="minor modification" ; else m="$*" ; fi
 #echo -n "Cleaning … " ; "`dirname $0`"/clean ; echo "done"
 
 git_sync_here() {
-  git pull -q --allow-unrelated-histories;
+  echo "Sync `basename $PWD` repository:"
+  git pull -q --allow-unrelated-histories
   if [ \! -z "`git status -s`" ] ; then git commit -q -a -m "$m" ; git push -q ; fi
   git status -s
 }
 
-gits="`find -path '\./\.[a-zA-Z]*' -prune -o -type d`"
-
-echo "$gits"
-exit
+gits="`find . -type d -a -regex '.*/\.git'`"
 
 if [ -z "$gits" ] ; then echo 'No git directory here'; exit 1 ; fi
 
-if [ -d ".git" ] ; then git_sync_here ; fi
-for g in $gits ; do d="`dirname $g`"
-  pushd $d > /dev/null
-  if [ "$d" \!= "." ] ; then echo "In $d" ; fi
-  git_sync_here
-  popd > /dev/null
-done
+for g in $gits ; do pushd "`dirname $g`" > /dev/null ; git_sync_here ; popd > /dev/null ; done
 
 

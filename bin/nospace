@@ -1,21 +1,5 @@
 #!/bin/bash
 
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> e4d850903a6aa3e034a6ff724a8d47524d62533a
->>>>>>> 4b91f2749361c69388f81f1e0a3c50a44e71e0ea
-# Usage: nospace $filename ; Removes blanks and hiding-dot in file name.
-
-f="`echo $* | sed 's/ /_/g' | sed 's/\/\./\//g'`"
-if [ "$*" \!= "$f" ] ; then mv "$*" "$f" ; fi
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-=======
 if [ -z "$1" -o "$1" = -h -o "$1" = --help ]
 then cat <<EOU
 Usage: nospace [-R] \$filename_or_directory
@@ -45,7 +29,4 @@ else
   echo "$f"
 fi
 
->>>>>>> fd2c3c97569b848b31df839804b749fed0f4c1eb
->>>>>>> e4d850903a6aa3e034a6ff724a8d47524d62533a
->>>>>>> 4b91f2749361c69388f81f1e0a3c50a44e71e0ea
 
