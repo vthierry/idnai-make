@@ -17,7 +17,7 @@ Saves the URL page, if available, in a file.
 }
 
 if (process.argv.length == 4 && process.argv[3] == "-") {
-  fetch(process.argv[2], { signal: AbortSignal.timeout(5000) } ).
+  fetch(process.argv[2]).
     then(response => {
       if (!response.ok) {
 	console.error("Error http: " + response.statusText + " (" + response.status + ")");
@@ -34,8 +34,7 @@ if (process.argv.length == 4 && process.argv[3] == "-") {
     headers: {
       'Content-Type': 'application/octet-stream'
     },
-    responseType: 'arraybuffer',
-    signal: AbortSignal.timeout(5000)
+    responseType: 'arraybuffer'
   }).
     then(response => {
       // console.dir(response, { depth: null }); // allows to dump the whole response tree
