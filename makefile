@@ -2,23 +2,14 @@
 define package
 {
   login: vthierry
-<<<<<<< HEAD
-  logo: "docs/idnai-logo-ocre.png"
-  keywords: [ raspberry esp32 web-service weak-json ]
-  dependencies: [ jsdoc docdash js-beautify markdown-it markdown-it-table-of-contents markdown-it-anchor idnai-json ]
-  os: [ Linux armv7l esp32 mingw64 ]
-=======
   logo: "docs/logos/idnai-logo-ocre.png"
   keywords: [ raspberry esp32 web-service weak-json ]
   dependencies: [ jsdoc docdash js-beautify markdown-it markdown-it-table-of-contents markdown-it-anchor ]
   os: [ linux armv7l esp32 darwin mingw64 ]
->>>>>>> b7d7076020c51ea3663cba51c7187e5c083cb02c
 }
 endef
 
 include src/makefile-rules.mk
-<<<<<<< HEAD
-=======
 
 BUILD = setup-build
 
@@ -35,6 +26,3 @@ setup-build: docs/setup.dir/setup.zip
 ##	Generates the setup archive
 docs/setup.dir/setup.zip: docs/setup.dir/build_setup_zip .
 	docs/setup.dir/build_setup_zip
-
-
->>>>>>> b7d7076020c51ea3663cba51c7187e5c083cb02c

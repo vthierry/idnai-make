@@ -69,4 +69,4 @@ if $has_spurious_package ; then echo "Correct such package reference and rerun" 
 cd .. ; npm install --silent ; e="$?" ; cd $name
 if [ "$e" \!= 0 ] ; then echo "npm install: " ; grep -v -E '^[0-9]* (verbose|info|timing|silly|http fetch)' ~/.npm/_logs/*.log ; exit 2 ; fi
 
-#@ chmod a-w ../{node_modules,package.json,package-lock.json}
+chmod a-w ../{node_modules,package.json,package-lock.json}

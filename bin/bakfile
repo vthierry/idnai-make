@@ -3,7 +3,7 @@
 if [ -z "$1" -o "$1" = -h -o "$1" = --help ]
 then cat <<EOU
 Usage: bakfile [\$file] [-v] [-d]
-Bakfiles a file if it exists, appending a \`~\` suffix.
+Backups a file a file if it exists, appending a \`~\` suffix.
 - Option:
   - -v: Outputs a message if the file exists and is renamed.
   - -d: Creates silently a directory of the file name, after backup.

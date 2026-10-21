@@ -1,0 +1,144 @@
+#!/bin/bash
+. ~/.bashrc
+
+usage() {
+ cat <<EOU
+Usage: setup [-x] [\$sketchbook-directory]
+Sets up an idnai-* driven GitHub package .
+ -x: Runs in a popup window
+ \$sketchbook-directory: Ths ketchbook directory, default is `.`.
+EOU
+ exit
+}
+
+## Used functions #########################################################################
+
+confirm() { # Internal usage: confirm \$message [\$exit_message]
+  read -p "$1? (y/N) : " -n 1 -e rep ; if [ "$rep" = "y" ] ; then true ; else if [ \! -z "$exit_message" ] ; then echo -e "$exit_message" ; exit 1 ; fi ; false ; fi
+}
+
+bakfile() { # Internal usage: Backups a file a file if it exists, appending a \`~\` suffix.
+  if [ -e "$1" ] ; then
+    if [ "$2" = "-v" ] ; then echo "The file '$1' exists and is renamed appendig a '~' suffix." ; fi
+    bakfile "$1~" ; mv "$1" "$1~"
+  fi
+}
+
+urlget() { # Internal usage: Saves the URL page in a file.
+  if ! nodejs -e "const fs = require('fs'); fetch('$1', { method: 'GET', headers: { 'Content-Type': 'application/octet-stream' }, responseType: 'arraybuffer'}).then(r => { if (r.ok) return r.arrayBuffer(); else { console.error('Unable to reach $1: are you connected and is https://github.com online ?'); process.exit(1); } }).then(b => { fs.writeFile('$1'.replace(new RegExp('.*/'), ''), Buffer.from(b), e => { }); })" ; then exit 1; fi
+}
+
+urlexists() { # Internal usage: Returns true if the URL is available, else false
+  if [ -z "`nodejs -e \"fetch('$1', { method: 'HEAD' }).then((r) => { if (r == undefined || !r.ok) console.log('false') });\"`" ] ; then return false ; else return true ; fi
+}
+
+openurl() { # Internal usage: Opens an web page in a browser.
+  if [ -z "$BROWSER" ] # Sets the BROWSER variable from a predefined ordered list.
+  then
+    BROWSER=xdg-open
+    for b in chromium firefox google-chrome brave opera
+    do if which -s $b ; then export BROWSER=$b ; break ; fi
+    done
+  fi
+  echo -e "$1" ; $BROWSER "$2" >/dev/null
+}
+
+getGitHubLogin() { # Internal usage: Gets the GitHub login as $GITHUB_USER 
+  ### Uses the $GITHUB_USER global variable, if defined, else read it.
+  if [ -z "$GITHUB_USER" ] 
+  then read -p "What is, please, your GitHub login: " -e GITHUB_USER
+  fi
+  ### Checks that it corresponds to a GitHub existing user.
+  if ! urlexists "https://github.com/$GITHUB_USER"
+  then echo -e "The login='$login' is a not GitHub login, please correct and rerun\n\t-Hint: Defines \`export GITHUB_USER='$login'\` in the ~/.bashrc file. " ; exit 1
+  fi
+  ### Appends to the ~/.bashrc file if not yet done.
+  if ! grep "GITHUB_USER[^=]*=.*$GITHUB_USER" ~/.bashrc
+  then bakfile  ~/.bashrc ; (cat  ~/.bashrc~ ; echo "export GITHUB_USER='$GITHUB_USER'") > ~/.bashrc
+  fi
+}
+
+getGitHubPackageName() { # Internal usage: Gets the GitHub package name as $NAME
+  getGitHubLogin
+  read -p "What is, please, the GitHub package name: " -e NAME
+  if ! url exists "https://github.com/$GITHUB_USER/$NAME" ; then echo -e "Sorry https://github.com/$GITHUB_USER/$NAME does not exist:\n\t- The package repository has to be created on GitHub first, or the package name='$NAME' may be wrong. Check and rerun. \nBye." ; openurl "GitHub repository creation" "https://vthierry.github.io/idnai-make/setup.dir/setup-3.pdf" ; exit 1 ; fi
+}
+
+console() { # Internal usage: console $title $command to run a command in a terminal emulator with the given title
+  title="`basename $1`" ; command="bash -c '$* ; read cont'"
+  if [ \! -z "`which lxterminal`" ]
+  then lxterminal --hide-menubar --geometry=80x16 --title="$title" --command="$command"
+  elif [ \! -z "`which xfce4-terminal`" ]
+  then xfce4-terminal --hide-menubar --geometry=80x16 --title="$title" --command="$command"
+  elif [ \! -z "`which gnome-terminal`" ]
+  then gnome-terminal --hide-menubar --geometry=80x16 --title="$title" -- "$command"
+  elif [ \! -z "`which konsole`" ]
+  then konsole −−nomenubar −−notabbar −−notoolbar --geometry=80x16 -title "$title" -e "$command"
+  elif [ \! -z "`which xterm`" ]
+  then xterm +tb --geometry=80x16 -T "$title" -e "$command"
+  else echo "No known terminal installed! Are you on a strange LinuX system? Please report this caveat: We will upgrade"
+  fi
+}
+
+
+## Starts dialog #########################################################################
+
+case "$1" in
+  -h | --help ) usage;;
+  -x ) shift ; console "$0 $*" ; exit;;
+  * ) if [ -d "$1" ] ; then cd "$1" ; shift ; else usage fi;;
+esac
+
+echo "This script will set up an idnai-* driven package, is it OK"
+
+### This script is only usable in a sketchbook directory
+confirm "Are you in your sketchbook directory" "In that case:\n- Choose and/or create sketchbook directory, for instance, '~/sketchbook/'.\n- Move this 'setup' script in it.\n- Rerun this script.\nBye."
+
+### This script requires nodejs
+if ! dpkg-query -Wf'${db:Status}' nodejs 2>/dev/null ; then sudo apt install nodejs ; fi
+
+getGitHubPackageName
+
+## Setup steps #########################################################################
+
+if [ \! \( -d "$NAME/.git" -a confirm "The sketchbook/$NAME exists, shall we use it" \) ]
+then
+  echo "[1/4] Working on your existing repository."
+  git pull -q --allow-unrelated-histories
+else
+  echo "[1/4] Cloning your repository, using ssh …"
+  bakfile $NAME -v
+  git clone --quiet git@github.com:$GITHUB_USER/$NAME.git
+fi
+
+echo "[2/4] Installing a few useful files …"
+if [ -f $0.dir/setup.zip ]
+then cp $0.dir/setup.zip .
+else urlget "https://vthierry.github.io/idnai-make/setup.dir/setup.zip"
+fi
+
+cd $NAME
+
+unzip -q -u ../setup.zip ; /bin/rm ../setup.zip
+if [ \( \! -e "makefile" \) -o confirm "Shall we overwrite the makefile" ]
+then bakfile makefile ; sed "s/@login/$GITHUB_USER/" < makefile~ > makefile
+fi
+
+make install
+
+if confirm "Shall we update the GitHub repository" "Ok, Bye."
+then
+  echo "[3/4] Updating the GitHub repository …"
+  git add .gitignore makefile bin docs src
+  git commit --quiet -a -m "setup as an idnai-* driven package"
+  git push --quiet --force
+fi
+  
+if [ -z "`nodejs -e \"fetch('https://$GITHUB_USER.github.io/$NAME', { method: 'HEAD' }).then((r) => { if (r.ok) console.log('ok') });\"`" ]
+then
+  echo "[4/4] Next step: please, manually activate the web pages:"
+  openurl "\tIn the Pages settings" "https://github.com/$GITHUB_USER/$NAME/settings/pages" 
+  openurl "\tUsing the related documentation" "https://vthierry.github.io/idnai-make/setup.dir/setup-6.pdf" 
+fi
+
+cd ..
