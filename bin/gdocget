@@ -9,6 +9,7 @@ Download a public google-drive document, spreadsheet, presentation, drawings or 
   -  url: The whole google-drive URL, of the form \`https://docs.google.com/..\`.
   - -o: A local file basename without extension, the document google-drive ID by default.
   - -f: The desired format, pdf by default, or, e.g., odt, ods, odp, odg for editable format.
+- It can not download a folder, use the web interface in that case, or https://takeout.google.com.
 EOU
 }
 
