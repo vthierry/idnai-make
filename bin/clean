@@ -18,6 +18,9 @@ clean()
      -name '.*%' -o \
      -name '*~' -o \
      -name '.*~' -o \
+     -name '*.stdout' -o \
+     -name '*.stderr' -o \
+     -name '*.undo-*' -o \
      -name '*.bak' -o \
      -name '.*.bak' -o \
      -name '*.log' -o \
