@@ -18,9 +18,8 @@ then
   if [ -d "$d" ]
   then
     pushd $d >/dev/null
-    ls -1 | sed 's/^/nospace -R /' > /tmp/nospace$$.txt
-    bash /tmp/nospace$$.txt
-    /bin/rm /tmp/nospace$$.txt
+    ls -1 | sed 's/^/nospace -R /' > /tmp/$$~
+    bash /tmp/$$~
     popd > /dev/null
   fi
 else

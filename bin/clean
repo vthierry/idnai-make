@@ -5,6 +5,7 @@ then cat <<EOU
 Usage: clean [\$directory…]
 Cleans all standard temporary files.
 - The default directory is \`.\`.
+- Also cleans \`/tmp/*~\` user's files, used by contract in scripts, and left temporary for debugging.
 EOU
 exit
 fi
@@ -44,6 +45,11 @@ clean()
      -exec /bin/rm -rf {} \; 2>/dev/null
 }
 
+cleantmp() {
+  find /tmp -user $USER -name '*~' -exec /bin/rm -rf {} \; 2>/dev/null
+}
+
+cleantmp
 if [ -z "$*" ]
 then clean "."
 else for d in $* ; do clean $d ; done
