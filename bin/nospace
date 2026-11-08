@@ -18,12 +18,12 @@ then
   if [ -d "$d" ]
   then
     pushd $d >/dev/null
-    ls -1 | sed 's/^/nospace -R /' > /tmp/$$~
+    ls -1 | sed 's/"/\\"/g' | sed 's/^\(.*\)/nospace -R "\1"/' > /tmp/$$~
     bash /tmp/$$~
     popd > /dev/null
   fi
 else
-  f="`echo $* | sed 's/ /_/g' | sed 's/^\/\./\//g'`"
+  f="`echo $* | sed "s/[ !]/_/g" | sed "s/'/´/g" | sed 's/"/¨/g' | sed 's/^\/\./\//g'`"
   if [ "$*" \!= "$f" ] ; then mv "$*" "$f" ; fi
   echo "$f"
 fi
