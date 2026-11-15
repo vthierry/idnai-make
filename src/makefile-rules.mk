@@ -39,8 +39,11 @@ default:
 ##   - If recompiled, the C/C++ `DEBUG` global variable is set.
 
 usage: # Shows this usage
-	echo -e 'Usage: make $$command [$$arguments]\n Available commands:'
-	cat $(THE_MAKEFILES) | sed  -n 's/^\([a-z_0-9]*\):[^#]*#/  - \1/p' | sed 's/ *[[]/[/' ; ok=
+	echo -e 'Usage: make $$command[=$$value] [$$arguments]'
+	cat $(THE_MAKEFILES) | sed  -n 's/^\([a-z_0-9]*\):[^#]*# */- \1 /p' | sed 's/ *[[]/[/' | sed 's/\([A-Z]\)/: \1/' ; ok=
+
+menu: # Starts an interactive menu
+	# ~/bin/choose target "`make | grep -E -v '(usage|menu|start|show|stop|publish)' | sed 's/\[.*\]//' | sed 's/- \([a-z]*\) *: */\t\1\t/'`"
 
 ## Installation operations
 
@@ -222,9 +225,9 @@ endif
 ###     - Any available maple batch file is processed, for code generation.
 ###     - Any `./src/%_hpp.html` file generates a `./src/%.hpp` file with the web page as constant C/C++ string.
 ###   - For compilation:
-###     - The `clang`, `g++`, or `c++` in this order, if available.
+###     - Uses the `clang`, `g++`, or `c++` compilers in this order, if available.
 ###     - The include path considers all `./node_modules/*/src` directories.
-###     - The `uname -s` value is set as the OS variable.
+###     - The OS variable is set to {linux-{raspberry,ubuntu,*},esp32,darwin,mingw}
 ###     - A maximal number of warning, debug information, and optimisation is performed.
 ###     - Actually the `-std=c++17` C++ standard is in use.
 ###   - On output:
@@ -240,7 +243,7 @@ CCP = $if($(which clang),clang,$if($(which g++),g++,$if($(which c++),c++,)))
 ifneq (,$(CPP))
 ifneq (,$(wildcard src/*.cpp)$(wildcard src/*.C)) 
 
-OS=$(shell uname -s) 
+OS=$(shell uname -a | sed 's/[^#]*#[^-]*-\([^ ]*\).*/-\1/') 
 
 CPP_FLAGS = -g -fPIC -Wall -std=c++17 -O3 -D OS=$(OS) \
  $(patsubst %,-I%,$(wildcard ./node_modules/*/src) $(wildcard /usr/include/python3.*) /usr/local/Frameworks/Python.framework/Headers)
@@ -303,7 +306,7 @@ test: # [=$file] [argv="$arg1 …"] Runs a given `src/$file` test file, if speci
 	esac ; fi	
 
 ifneq (,$(which gdb))
-gtest: $(BUILD_CPP) # gtest[=file] [argv="arg1 …"] ; Runs a given test CPP file with gdb.
+gtest: $(BUILD_CPP) # [=file] [argv="arg1 …"] Runs a given test CPP file with gdb.
 	if [ -z "$(gtest)" ] ; then test="test" ; else test="$(basename $(gtest))" ; fi \
 	unset DEBUGINFOD_URLS ;	(echo "break exit" ; echo "run $(argv)" ; echo "echo --- backtrace ------------------------------------------------------------------------------\n" ; echo "backtrace" ; echo "echo --- backtrace full -------------------------------------------------------------------------\n" ; echo "backtrace full" ; echo "quit 0") > /tmp/a.cmd ;\
 	gdb -n -q node_modules_/.bin/$$test -x /tmp/a.cmd --return-child-result 2>&1 ; ok=
@@ -312,7 +315,7 @@ else
 endif
 
 ifneq (,$(which valgrind))
-vtest: $(BUILD_CPP) # vtest[=file] [argv="arg1 …"] ; Runs a given test CPP file with valgrind.
+vtest: $(BUILD_CPP) # [=file] [argv="arg1 …"] Runs a given test CPP file with valgrind.
 	if [ -z "$(vtest)" ] ; then test="test" ; else test="$(basename $(vtest))" ; fi \
 	ulimit -s 100000 2>/dev/null ; export GLIBCXX_FORCE_NEW=1 ; valgrind --max-stackframe=100000000 --track-origins=yes node_modules_/.bin/$$ $(argv)
 else 
@@ -364,6 +367,10 @@ stop: # [=$port] Stops, if not yet done, a local 'http:127.0.0.1:$port' server, 
 
 sync: # [=$message] Synchronizes files with respect to the github repositories.
 	git_sync $(sync)
+
+gitk: # Starts the graphical tool for visualizing and exploring the history as a tree of commits.
+	needfor gitk
+	gitk
 
 ## Force synchronization with respect to npm repositories
 
