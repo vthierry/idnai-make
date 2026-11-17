@@ -37,11 +37,13 @@ clean()
      -name '*.dvi' -o \
      -name '*.lof' -o \
      -name '*.log' -o \
+     -name '*.out' -o \
      -name '*.ilg' -o \
      -name '*.nav' -o \
      -name '*.spl' -o \
      -name '*.snm' -o \
-     -name '*.sol' \) \
+     -name '*.sol'  -o \
+     -name '*.toc' \) \
      -exec /bin/rm -rf {} \; 2>/dev/null
 }
 

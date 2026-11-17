@@ -1,5 +1,4 @@
 #!/bin/bash
-export PATH="`dirname $0`:$PATH"
 needfor arp-scan
 
 usage() {

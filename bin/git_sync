@@ -15,7 +15,7 @@ fi
 if [ -z "$*" ] ; then m="minor modification" ; else m="$*" ; fi
 
 ## Checks for the id_rsa key
-if [ -f ~/bin/id_rsa_add ] ; then ~/bin/id_rsa_add  ; fi
+. ~/bin/id_rsa_add
 
 git_sync_here() { # Usage: git_sync_here : Git syncs in the current directory
   echo "Sync `basename $(pwd)` repository:" 

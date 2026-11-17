@@ -1,5 +1,4 @@
 #!/bin/bash
-export PATH="`dirname $0`:$PATH"
 
 if [ -z "$1" -o "$1" = -h -o "$1" = --help ]
 then cat <<EOU

@@ -1,5 +1,4 @@
 #!/bin/sh
-export PATH="`dirname $0`:$PATH"
 
 usage() {
  cat <<EOU
@@ -20,13 +19,13 @@ dir="."; name="*"
 while [ \! -z "$1" ]
 do
  case "$1" in
-  -dir ) dir="$2"; shift;;
-  -name ) name="$2"; shift;;
-  -in ) in="$2"; shift;;
-  -out ) out="$2"; shift;;
-  * ) usage; exit;;
+  -dir ) dir="$2" ;;
+  -name ) name="$2" ;;
+  -in ) in="$2" ;;
+  -out ) out="$2" ;;
+  * ) usage ; exit ;;
  esac
- shift
+ shift ; shift
 done
 
 if [ -z "$in" ]
