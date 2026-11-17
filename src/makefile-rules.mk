@@ -3,6 +3,7 @@
 ## Configures the makefile with bash, in silent mode, avoiding spurious parallelism, and extending path.
 
 export SHELL := /bin/bash
+export BASH_ENV := ./node_modules/idnai-make/bin/alias
 
 THE_MAKEFILES = makefile $(wildcard ./node_modules/*/src/makefile-rules.mk)
 

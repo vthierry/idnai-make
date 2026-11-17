@@ -1,0 +1,70 @@
+#!/bin/bash
+. ~/.bashrc
+
+usage() {
+ cat <<EOU
+Usage: console [-t \$title] [-g \${width}x\${height}] [-d \$directory] [-b|-s \$delay] [\$command [\$arguments]]
+Runs a command in an interactive console window.
+- Options:
+  -t: The window title; default is the command basename.
+  -g: The window column-count x line-count; position can also be set (WxH+Left+Top); default is 80x16.
+  -d: The working directory; default is \`~/Desktop\`, use \`-d .\` to work in the current directory.
+  -m: Starts minimized.
+  -b: Echoes '…done.' and close the window on keyboard return; else close the window straight at program end.
+  -s: Closes the window after a given delay in second.
+- The default \$command is \`bash\`, i.e., a terminal emulation.
+- If an error occurs the \`-b\` option is enforced.
+- Notification: The \`console -n \$message\` displays a desktop notification.
+  - It is a shortcut for \`console -t '' -g 64x2-1+40 -s 5 echo \$message\`
+EOU
+}
+
+if [ "$1" = "-n" ] ; then shift ; ($0 -t ' ' -g 64x2-1+40 -s 5 echo $* &) ; exit ; fi
+
+geometry="80x16"
+bye='; if [ "$?" \!= 0 ] ; then echo …done. ; read cont ; fi'
+minimized=false
+cd ~/Desktop
+while [ \! -z "$1" ] ; do case "$1" in
+ -h | --help ) usage ; exit ;;
+ -t ) title="$2"; shift ;;
+ -g ) geometry="$2"; shift ;;
+ -m ) minimized=true ;;
+ -d )
+   myid="`id -u $USER`"
+   # Sets the correct gvfs mounted volumes
+   mydir="`echo $2 | sed "s/^mtp:\/\/\(.*\)/\/run\/user\/$myid\/gvfs\/mtp\\:host\\=\1/" | sed 's/%20/ /g'`"
+   cd "$mydir" ; shift ;;
+ -s ) bye="$bye ; sleep $2" ; shift ;;
+ -b ) bye="; echo …done. ; read cont" ;;
+ * ) break;;
+esac ; shift ; done
+if [ -z "$1" ] ;
+then command="bash" ; if [ -z "$title" ] ; then title="Terminal: `pwd | sed s/^.home.$USER/~/`" ; fi
+else command="bash -c '$*$bye'"
+fi
+if [ -z "$title" ] ; then title="`basename $(echo $1 | awk '{print $1}')`" ; fi
+if $minimized ; then needfor ydotool ; needfor ydotoold ; fi
+
+terminal() {
+  if [ \! -z "`which lxterminal`" ]
+  then lxterminal --profile='xterm' --geometry=$geometry --title="$title" --command="$command"
+  elif [ \! -z "`which xfce4-terminal`" ]
+  then xfce4-terminal --hide-menubar --geometry=$geometry --title="$title" --command="$command"
+  elif [ \! -z "`which gnome-terminal`" ]
+  then gnome-terminal --hide-menubar --geometry=$geometry --title="$title" -- "$command"
+  elif [ \! -z "`which konsole`" ]
+  then konsole −−nomenubar −−notabbar −−notoolbar --geometry=$geometry -title "$title" -e "$command"
+  elif [ \! -z "`which xterm`" ]
+  then xterm +tb --geometry=$geometry -T "$title" -e "$command"
+  else echo "No known terminal installed! Are you on a strange LinuX system? Please report this caveat: We will upgrade"
+  fi
+}
+
+terminal &
+
+if $minimized ; then
+  sleep 0.5
+  if ps -e | grep mate-session > /dev/null ; then ydotool 18:1 120:1 18:0 120:0 ; fi
+fi
+

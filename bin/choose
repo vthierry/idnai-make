@@ -1,0 +1,41 @@
+#!/bin/bash
+
+if [ -z "$1" -o "$1" = -h -o "$1" = --help ]
+then cat <<EOU
+Usage: . ~/bin/choose \$name \$values
+Asks a for an option between 1 up to no more than 26 values.
+- \$name: The value's name.
+- \$values: A multiline string:
+  - (i) The 1st row is the choice's header.
+  - (ii) Then, there is one option by row.
+On return:
+- Sets the \`choice\` environment temporary variable, if a choice is made, otherwise \`choice\` is unset.
+Notes:
+- The call sequence includes a '.', unless \`alias choose='. ~/bin/choose'\` is defined. 
+EOU
+else
+  unset choice
+  l="`echo -e \"$2\" | awk 'NR == 1 { print "   " $0 } NR > 1 { if (length() > 0) printf("%c: %s\n",NR+95,$0); }' ; echo '0: None'`"
+  n="`echo -e \"$l\" | wc -l`"
+  if [ "$n" -gt 28 ] ; then echo "Too many options for the choose function, this is a programmer bug"
+  elif [ "$n" -lt 3 ] ; then echo -e "$l" ; echo "No option to choose"
+  else
+    if [ "$n" = 3 ] ; then echo -e "$l" ; if confirm "Ok with choice 'a' for $1" ; then rep=a ; else rep=0 ; fi
+    else
+      z="`echo $((n+94)) | awk '{printf "%c", $1}'`"
+      while true ; do
+	echo -e "$l" ; read -p "Choose the $1 option, from 'a' to '$z', or 0: " -n 1 -e rep
+	case $rep in 
+	  0|[a-$z]) break;;
+	esac
+      done
+    fi
+    if [ "$rep" \!= 0 ] ; then
+      rep="`printf \"%d\" \"'$rep\"`"
+      export choice="`echo -e \"$l\" | head -n $((rep-95)) | tail -1 | sed 's/[a-z]: //'`"
+      return 0
+    else
+      return 1
+    fi
+  fi
+fi

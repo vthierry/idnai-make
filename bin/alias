@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Defines useful command options and shortcuts
 
 alias cp='cp -i' # Usage: cp $source $target ; Forces interactive copy to avoid error.
@@ -28,9 +30,12 @@ l() {  # Usage: l [$delay-in-minutes] ; Lists files modified since less than the
   find $HOME -regextype egrep -type f -a -mmin -"$d" -a ! -path "*/.git/*" -a ! -regex "$HOME/\.(cache|config/(chromium|GIMP|google-chrome)|thunderbird)/.*"
 }
 alias m='~/bin/make' # Usage: m ; Runs make in the current directory.
-alias i='needfor arp-scan ; echo -e "Local netwok scan:\n|       IP      |       MAC       | HOSTNAME                            | VENDOR                                    |\n|---------------|-----------------|-------------------------------------|-------------------------------------------|" ; sudo arp-scan -r 5 --l -g -d -x --format="|\${ip;-15}|\${mac;17}| \${name;-36}| \${vendor;-42}|"' # Usage: i ; Inspects the local network and provides the available human readable information.
+i() { # Usage: i ; Inspects the local network and provides the available human readable information.
+  needfor arp-scan
+  echo -e "Local netwok scan:\n|       IP      |       MAC       | HOSTNAME                            | VENDOR                                    |\n|---------------|-----------------|-------------------------------------|-------------------------------------------|"
+  sudo arp-scan -r 5 --l -g -d -x --format="|\${ip;-15}|\${mac;17}| \${name;-36}| \${vendor;-42}|"
+}
 alias s='xdg-open' # Usage: s $file ; Shows a file with the default application.
 u() { # Usage: u $command ; Usage (man page) of a given command opens in a popup window.
-  console man $1
+  if [ \! -z "$1" ] ; then console man $1 ; fi
 }
-alias choose=". ~/bin/choose" # Allows to call choose without the dot construct
